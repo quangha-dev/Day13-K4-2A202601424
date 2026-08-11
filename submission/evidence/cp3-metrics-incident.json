@@ -1,0 +1,16 @@
+{
+  "phase": "official-challenge",
+  "challenge_id": "day13-k4-observability-v1",
+  "incident": "rag_slow",
+  "affected_feature": "monitoring",
+  "challenge_latency_threshold_ms": 2000,
+  "traffic": 15,
+  "latency_p50": 151.0,
+  "latency_p95": 2652.0,
+  "latency_p99": 2652.0,
+  "error_rate_pct": 0.0,
+  "total_cost_usd": 0.0324,
+  "tokens_in_total": 505,
+  "tokens_out_total": 2057,
+  "quality_avg": 0.8667
+}

@@ -37,7 +37,7 @@
 ## 5. Dashboard, SLO và alerts
 
 - Kết quả `validate_dashboard.py`: `HỢP LỆ: 6/6 panel có trong dashboard contract.`
-- Evidence dashboard: Quy cách chi tiết tại [`docs/dashboard-spec.md`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/docs/dashboard-spec.md) và contract [`config/dashboard.yaml`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/config/dashboard.yaml). Đã thiết lập dựa trên **4 Trụ cột AI Observability (Performance, Cost, Quality, Reliability)** và **Mô hình Dashboard 3 Layer cho Stakeholders**:
+- Evidence dashboard: [`evidence/cp2-dashboard-6-panels.png`](evidence/cp2-dashboard-6-panels.png), [`evidence/cp2-dashboard-runtime.html`](evidence/cp2-dashboard-runtime.html) và [`evidence/cp2-dashboard-validator.txt`](evidence/cp2-dashboard-validator.txt). Quy cách tại [`../docs/dashboard-spec.md`](../docs/dashboard-spec.md) và contract [`../config/dashboard.yaml`](../config/dashboard.yaml). Dashboard được tạo từ log runtime thật và thể hiện **4 Trụ cột AI Observability (Performance, Cost, Quality, Reliability)**:
   - **Layer 1 (Overview - Leadership)**: Sức khỏe hệ thống tổng thể, Uptime, Total Spend, CSAT/Quality score.
   - **Layer 2 (Detail - Engineering)**: 6 Tier-1 Core Golden Signals (Latency P95, Traffic RPM, Error Rate %, Total Cost USD, Input/Output Tokens, Quality Score) + Tier-2 Enterprise Metrics (TTFT, RAG Search Latency, Cost by Feature, Token Speed).
   - **Layer 3 (Drill-down - Debugging)**: Langfuse Traces Waterfall & Structured JSON Logs Search via `correlation_id`.
@@ -48,17 +48,17 @@
   - Total tokens <= 50000 (Phân tách và kiểm soát Input Tokens vs Output Tokens để phát hiện nghẽn xử lý).
   - Quality score >= 0.75 (Đóng vai trò phanh an toàn - Safety Guardrail - phát hiện sự thoái hóa chất lượng/hallucination ngay cả khi HTTP 200 OK).
 
-- Alert rules và runbook:
+- Alert rules và runbook: [`../config/alert_rules.yaml`](../config/alert_rules.yaml) và [`../docs/alerts.md`](../docs/alerts.md). Ba rule gồm high latency P95, elevated error rate và cost budget exceeded; đều symptom-based, có owner và ba bước điều tra đầu tiên.
 
 ## 6. Điều tra challenge
 
-- Challenge ID:
-- Triệu chứng từ metrics:
-- Trace ID liên quan:
-- Log line/correlation ID liên quan:
-- Root cause:
-- Fix action:
-- Preventive measure:
+- Challenge ID: `day13-k4-observability-v1` (`rag_slow`, affected feature `monitoring`, threshold 2000 ms).
+- Triệu chứng từ metrics: P95 tăng từ 152 ms lên 2652 ms; error rate vẫn 0%. Sau disable/restart, P95 hồi phục về 151 ms. Evidence: [`evidence/cp3-metrics-incident.png`](evidence/cp3-metrics-incident.png), [`evidence/cp3-metrics-baseline.json`](evidence/cp3-metrics-baseline.json), [`evidence/cp3-metrics-incident.json`](evidence/cp3-metrics-incident.json), [`evidence/cp3-metrics-recovery.json`](evidence/cp3-metrics-recovery.json).
+- Trace ID liên quan: Chưa có — Langfuse chưa được cấu hình. Component timing thật cho thấy `retrieve=2512.5 ms`, `generate=150.7 ms`; xem [`evidence/cp3-component-timing.json`](evidence/cp3-component-timing.json). Cần bổ sung trace ID/waterfall Langfuse trước khi nộp.
+- Log line/correlation ID liên quan: `req-939a54c9`, `response_sent.latency_ms=2651`; xem [`evidence/cp3-correlated-log.json`](evidence/cp3-correlated-log.json).
+- Root cause: incident `rag_slow` thêm khoảng 2.5 giây trong RAG retrieval. Retrieval chiếm khoảng 94.3% thời gian hai component. Việc gọi sync `agent.run()` trong async endpoint còn khuếch đại client tail latency khi concurrency cao.
+- Fix action: disable route chậm; dùng cache/fallback retrieval; áp dụng timeout/circuit breaker; đưa tác vụ blocking sang worker/thread pool phù hợp.
+- Preventive measure: giữ sub-span retrieval/generation, alert P95 theo feature, load test concurrency trong CI và theo dõi chênh lệch client/internal latency. Báo cáo đầy đủ: [`evidence/cp3-investigation.md`](evidence/cp3-investigation.md).
 
 ## 7. Đóng góp cá nhân
 

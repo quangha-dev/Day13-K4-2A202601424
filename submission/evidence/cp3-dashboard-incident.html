@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CP3 day13-k4-observability-v1 — rag_slow thật</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, Segoe UI, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #07111f; color: #e8f0fa; }
+    main { width: 1180px; min-height: 720px; margin: 0 auto; padding: 42px; }
+    header { display: flex; justify-content: space-between; align-items: end; margin-bottom: 28px; }
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    .subtitle, .meta { color: #9fb0c5; font-size: 14px; }
+    .badge { padding: 8px 12px; border: 1px solid #31506d; border-radius: 999px; color: #9fd4ff; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { min-height: 190px; padding: 24px; border-radius: 16px; border: 1px solid #243b53; background: linear-gradient(145deg, #0d1b2b, #101f32); box-shadow: 0 10px 30px #0005; }
+    .card.ok { border-top: 4px solid #35d07f; }
+    .card.alert { border-top: 4px solid #ff5d6c; background: linear-gradient(145deg, #25131b, #161b2a); }
+    .card-title { color: #9fb0c5; text-transform: uppercase; letter-spacing: .08em; font-size: 13px; }
+    .card-value { margin: 28px 0 18px; font-size: 29px; font-weight: 750; }
+    .card-detail { color: #b9c8d8; font-size: 14px; }
+    footer { margin-top: 26px; display: flex; justify-content: space-between; color: #7f94aa; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>CP3 day13-k4-observability-v1 — rag_slow thật</h1><div class="subtitle">6 Golden Signals · dữ liệu runtime thật từ JSONL</div></div>
+      <div class="badge">Time range: 60 phút · Refresh: 30 giây</div>
+    </header>
+    <div class="grid"><section class="card ok">
+  <div class="card-title">Latency P50 / P95 / P99</div>
+  <div class="card-value">151 / 2652 / 2652 ms</div>
+  <div class="card-detail">SLO: P95 ≤ 3000 ms</div>
+</section>
+<section class="card ok">
+  <div class="card-title">Traffic</div>
+  <div class="card-value">15 requests</div>
+  <div class="card-detail">Cửa sổ 60 phút</div>
+</section>
+<section class="card ok">
+  <div class="card-title">Error rate</div>
+  <div class="card-value">0.00% (0 lỗi)</div>
+  <div class="card-detail">SLO: ≤ 2%</div>
+</section>
+<section class="card ok">
+  <div class="card-title">Total cost</div>
+  <div class="card-value">$0.032370</div>
+  <div class="card-detail">Ngưỡng: ≤ $2.50</div>
+</section>
+<section class="card ok">
+  <div class="card-title">Input / Output tokens</div>
+  <div class="card-value">505 / 2057</div>
+  <div class="card-detail">Ngưỡng tổng: ≤ 50,000 tokens</div>
+</section>
+<section class="card ok">
+  <div class="card-title">Quality proxy</div>
+  <div class="card-value">0.867</div>
+  <div class="card-detail">SLO: ≥ 0.75</div>
+</section>
+</div>
+    <footer><span>Nguồn: data\logs.jsonl</span><span>Generated UTC: 2026-08-11T09:24:34+00:00</span></footer>
+  </main>
+</body>
+</html>

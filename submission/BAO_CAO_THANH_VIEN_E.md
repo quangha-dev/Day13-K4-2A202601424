@@ -33,7 +33,28 @@ Lưu ý trung thực: baseline starter trước khi A/B/C/D sửa không còn tr
 
 ## Phần đang thực hiện tiếp
 
-- [ ] CP2: sub-span RAG/LLM, trace metadata correlation ID, dashboard runtime, SLO/alerts/runbook.
+- [x] CP2 code: thêm sub-span `retrieve`/`generate` và gắn correlation ID vào trace metadata.
+- [x] CP2 dashboard: tạo renderer đọc log JSONL thật, dashboard 6 panel và ảnh baseline runtime.
+- [x] CP2 SRE: hoàn thiện ba alert rules, ba runbook và đồng bộ ngưỡng SLO.
 - [ ] CP2: Langfuse ≥10 traces, prompt v1/v2 và rollback — cần key/project Langfuse thật.
-- [ ] CP3: chạy challenge chính thức, lưu metrics/trace/log thật và kết luận root cause.
+- [x] CP3 metrics/log: chạy challenge chính thức, lưu baseline/incident/recovery, component timing và correlated log thật.
+- [ ] CP3 trace Langfuse: cần đăng nhập/project key để lấy trace ID và waterfall thật.
 - [ ] Hoàn tất `REPORT.md`, danh sách evidence và kiểm tra nộp bài.
+
+### CP2 — Phần đã xác minh không cần Langfuse
+
+- Dashboard validator: 6/6 panel hợp lệ.
+- Dashboard runtime baseline đọc 21 log records trong cửa sổ 60 phút: P95 152 ms, 10 requests, error rate 0%, cost 0.021645 USD, 330/1377 tokens, quality 0.88.
+- Ảnh thật: `evidence/cp2-dashboard-6-panels.png`; HTML nguồn: `evidence/cp2-dashboard-runtime.html`.
+- Alert rules không còn TODO; mỗi rule có severity, symptom-based condition, owner và runbook.
+- Full test sau thay đổi CP2: 50 tests pass.
+- Trình duyệt Langfuse hiện dừng tại trang đăng nhập. Không dùng key giả và không ghi nhận trace giả.
+
+### CP3 — Điều tra challenge thật
+
+- Challenge: `day13-k4-observability-v1`, incident `rag_slow`, feature `monitoring`, threshold 2000 ms.
+- Metrics: P95 tăng từ 152 ms lên 2652 ms; error rate vẫn 0%; sau disable/restart P95 hồi phục về 151 ms.
+- Component timing: `retrieve=2512.5 ms`, `generate=150.7 ms`; retrieval chiếm khoảng 94.3%.
+- Log: correlation ID `req-939a54c9` nối `request_received` với `response_sent.latency_ms=2651`.
+- Phát hiện thêm: client tail latency 8–13 giây do sync `agent.run()` block async event loop khi concurrency=5.
+- Root cause, mitigation, fix và preventive measure được ghi trong `evidence/cp3-investigation.md`.
