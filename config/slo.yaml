@@ -4,13 +4,16 @@ slis:
   latency_p95_ms:
     objective: 3000
     target: 99.5
-    note: Replace with your group's target
+    note: Trong 28 ngày, ít nhất 99.5% kỳ đánh giá phải có độ trễ dưới 3000ms.
   error_rate_pct:
     objective: 2
     target: 99.0
+    note: Trong 28 ngày, ít nhất 99% kỳ đánh giá phải có tỷ lệ lỗi dưới 2%.
   daily_cost_usd:
     objective: 2.5
     target: 100.0
+    note: Trong 28 ngày, chi phí AI mỗi ngày không vượt quá 2.5 USD.
   quality_score_avg:
     objective: 0.75
     target: 95.0
+    note: Trong 28 ngày, ít nhất 95% kỳ đánh giá phải có điểm chất lượng trung bình trên 0.75.
