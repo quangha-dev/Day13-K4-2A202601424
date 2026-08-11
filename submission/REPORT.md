@@ -41,7 +41,6 @@
   - Total cost <= 2.5 USD (Giám sát rủi ro bùng nổ chi phí phi tuyến tính do prompt quá dài hoặc truy vấn lặp).
   - Total tokens <= 50000 (Phân tách và kiểm soát Input Tokens vs Output Tokens để phát hiện nghẽn xử lý).
   - Quality score >= 0.75 (Đóng vai trò phanh an toàn - Safety Guardrail - phát hiện sự thoái hóa chất lượng/hallucination ngay cả khi HTTP 200 OK).
-  - Tuân thủ toàn diện chuẩn quốc tế **OpenTelemetry GenAI Semantic Conventions**.
 
 - Alert rules và runbook:
 
