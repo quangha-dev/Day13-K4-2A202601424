@@ -4,7 +4,7 @@
 
 - Tên nhóm: K4-DAY13-2A202601424
 - Repository URL: https://github.com/quangha-dev/Day13-K4-2A202601424
-- Commit SHA cuối: Cập nhật sau commit hoàn tất cuối cùng
+- Commit SHA kỹ thuật dùng làm mốc: `f0302ce`; khi nộp lấy SHA mới nhất bằng `git rev-parse HEAD`.
 - Thành viên và vai trò:
   - Thành viên A (Raijuz): API & Middleware.
   - Thành viên B (Huy): Security Engineer.
@@ -17,22 +17,23 @@
 - Điểm `validate_logs.py`: 100/100 — [`evidence/cp1-validate-logs.txt`](evidence/cp1-validate-logs.txt)
 - Tổng số traces: Chưa thu thập — Langfuse chưa được cấu hình trên máy tích hợp.
 - Số PII leak còn lại: 0.
-- Link/đường dẫn dashboard: [`../config/dashboard.yaml`](../config/dashboard.yaml), evidence runtime bổ sung tại CP2.
+- Link/đường dẫn dashboard: [`../config/dashboard.yaml`](../config/dashboard.yaml) và [`evidence/cp2-dashboard-6-panels.png`](evidence/cp2-dashboard-6-panels.png).
+- Public tests: 50 tests pass, 2 warning deprecation không ảnh hưởng kết quả.
 
 ## 3. Logging và tracing
 
 - Evidence correlation ID: [`evidence/cp1-correlation-log.json`](evidence/cp1-correlation-log.json) — `request_received` và `response_sent` cùng ID `req-df839ca4`.
 - Evidence PII redaction: [`evidence/cp1-pii-redacted.json`](evidence/cp1-pii-redacted.json) — email, số điện thoại và credit card đều được thay bằng marker.
-- Evidence trace waterfall: Chưa thu thập — bổ sung sau khi bật Langfuse.
-- Giải thích một span đáng chú ý: Sẽ hoàn thiện bằng kết quả điều tra CP3 thật.
+- Evidence trace waterfall: Chưa thu thập — cần bổ sung `evidence/cp2-trace-waterfall.png` sau khi bật Langfuse.
+- Giải thích một span đáng chú ý: Component timing CP3 đo `retrieve=2512.5 ms` và `generate=150.7 ms`; retrieval chiếm khoảng 94.3%. Cần đối chiếu bằng waterfall Langfuse trước khi nộp.
 
 ## 4. Prompt versioning
 
-- Prompt name:
-- Version/label baseline:
-- Version/label candidate:
-- Trace ID của mỗi version:
-- Bằng chứng đổi label hoặc rollback:
+- Prompt name: Dự kiến `day13-chat` theo contract; chưa tạo trên project Langfuse.
+- Version/label baseline: Chưa có evidence thật.
+- Version/label candidate: Chưa có evidence thật.
+- Trace ID của mỗi version: Chưa có.
+- Bằng chứng đổi label hoặc rollback: Chưa có. Các file ảnh bắt buộc còn thiếu được liệt kê trong [`EVIDENCE_CHECKLIST.md`](EVIDENCE_CHECKLIST.md).
 
 ## 5. Dashboard, SLO và alerts
 
@@ -66,6 +67,10 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 
 | Thành viên | Phần việc | Commit/PR | Điều đã học |
 |---|---|---|---|
-| Nghĩa (Thành viên C) | **Metrics & Dashboard Spec**: Bổ sung `error_rate_pct` zero-safe trong `app/metrics.py`, viết 6 unit tests trong `tests/test_metrics.py`, chuẩn hóa & mở rộng `docs/dashboard-spec.md` theo chuẩn kiến trúc Dashboard 2-Tier OpenTelemetry GenAI. | [Commit 1039dd7](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/1039dd7) / PR `dev/nghia` | Nắm vững 6 GenAI Golden Signals cốt lõi (Tier-1) và 6 chỉ số nâng cao Enterprise Tier-2 (TTFT, RAG Latency, Cost per User, Generation Speed, Faithfulness, Token Ratio). |
+| Raijuz (Thành viên A) | Correlation ID middleware, enrichment, response headers, exception handling và load-test error path. | [Commit 103fc50](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/103fc50) | Contextvars phải được clear/bind theo request; error response vẫn cần correlation ID. |
+| Huy (Thành viên B) | Recursive PII scrubbing, regex email/phone/CCCD/card/passport/address và security tests. | [Commit d8069a2](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/d8069a2) | Scrubber phải chạy trước serializer và cần negative test để không phá metadata kỹ thuật. |
+| Nguyễn Trần Nghĩa (Thành viên C) | `error_rate_pct` zero-safe, unit tests và dashboard spec 6 Golden Signals. | [Commit 77d7033](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/77d7033) | Percentile/error rate cần zero-safe; dashboard AI phải theo dõi thêm cost và quality. |
+| Hải (Thành viên D) | SLO và nền tảng runbook symptom-based; phần còn thiếu được hoàn thiện trong tích hợp CP2. | [Commit 167edaf](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/167edaf) | Alert nên dựa trên triệu chứng/SLO và có ba bước điều tra đầu tiên rõ ràng. |
+| Nguyễn Quang Hà (Thành viên E) | QA tích hợp, sub-span RAG/LLM, correlation trace metadata, dashboard runtime, điều tra CP3 và tổng hợp evidence/report. | Commits `05b5ab8`, `868771b`, `f0302ce`; xem [`BAO_CAO_THANH_VIEN_E.md`](BAO_CAO_THANH_VIEN_E.md) | Metrics phát hiện triệu chứng; component trace khoanh vùng; correlation log chứng minh request/root cause. Không dùng trace/key giả khi chưa có Langfuse. |
 
 

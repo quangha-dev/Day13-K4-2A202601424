@@ -19,4 +19,4 @@ Estimated Score: 100/100
 Kiểm tra bổ sung ngoài validator:
 UNIQUE_API_CIDS=10
 ALL_SERVER_CIDS_VALID
-Không tìm thấy chuỗi PII thô theo các mẫu @, 4111 1111 và 0987654321.
+Không tìm thấy email, số thẻ test hoặc số điện thoại thô trong log sau load test.

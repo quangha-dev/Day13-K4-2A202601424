@@ -58,3 +58,10 @@ Lưu ý trung thực: baseline starter trước khi A/B/C/D sửa không còn tr
 - Log: correlation ID `req-939a54c9` nối `request_received` với `response_sent.latency_ms=2651`.
 - Phát hiện thêm: client tail latency 8–13 giây do sync `agent.run()` block async event loop khi concurrency=5.
 - Root cause, mitigation, fix và preventive measure được ghi trong `evidence/cp3-investigation.md`.
+
+### Kiểm kê nộp bài
+
+- Đã tạo `EVIDENCE_CHECKLIST.md` và đối chiếu từng yêu cầu của `SUBMISSION.md`/`docs/grading-evidence.md`.
+- Phần local đã đầy đủ: CP0, CP1, dashboard, SLO/alerts/runbook, CP3 metrics/log/recovery.
+- Phần chưa đủ duy nhất là evidence trên Langfuse: danh sách traces, waterfall, prompt v1/v2, hai prompt traces, rollback và incident trace ID.
+- Không tạo ảnh/trace giả để đánh dấu hoàn tất.
