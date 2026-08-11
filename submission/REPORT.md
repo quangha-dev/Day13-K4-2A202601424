@@ -4,8 +4,9 @@
 
 - Tên nhóm: K4-DAY13-2A202601424
 - Repository URL: https://github.com/quangha-dev/Day13-K4-2A202601424
-- Commit SHA kỹ thuật dùng làm mốc: `c77f491`; khi nộp lấy SHA mới nhất bằng `git rev-parse HEAD`.
-- Thành viên và vai trò:
+- Commit hoàn tất kỹ thuật/evidence hiện tại: `b9ef61b`; sau lần chuẩn hóa cuối, nộp SHA mới nhất từ `git rev-parse HEAD`.
+- Nhóm có 5 thành viên, được ánh xạ vào 4 workstream chính của README: Logging & PII (A, B); Tracing & Prompt Version (E); Dashboard/SLO/Alert (C, D); Incident/Report/Demo (E).
+- Thành viên và phần việc:
   - Thành viên A (Raijuz): API & Middleware.
   - Thành viên B (Huy): Security Engineer.
   - Thành viên C (Nguyễn Trần Nghĩa): Metrics & Dashboard.
@@ -15,10 +16,12 @@
 ## 2. Kết quả kỹ thuật
 
 - Điểm `validate_logs.py`: 100/100 — [`evidence/cp1-validate-logs.txt`](evidence/cp1-validate-logs.txt)
+- Baseline starter phục dựng từ commit gốc `b95464c`: 30/100, 10 request đều có correlation ID `MISSING`; xem [`evidence/cp0-baseline-validator.txt`](evidence/cp0-baseline-validator.txt). Sau CP1 đạt 100/100.
+- Health/API: `ok=true`, tracing bật, tất cả incident tắt; xem [`evidence/cp0-health.png`](evidence/cp0-health.png) và [`evidence/cp0-health.json`](evidence/cp0-health.json).
 - Tổng số traces: đã xác minh hơn 10 traces; riêng baseline có 10 trace ID trong [`evidence/cp2-trace-summary.json`](evidence/cp2-trace-summary.json) và ảnh danh sách [`evidence/cp2-trace-list-10.jpg`](evidence/cp2-trace-list-10.jpg).
 - Số PII leak còn lại: 0.
 - Link/đường dẫn dashboard: [`../config/dashboard.yaml`](../config/dashboard.yaml) và [`evidence/cp2-dashboard-6-panels.png`](evidence/cp2-dashboard-6-panels.png).
-- Public tests: 50 tests pass, 2 warning deprecation không ảnh hưởng kết quả.
+- Public và regression tests: 51 tests pass, 2 warning deprecation không ảnh hưởng kết quả.
 
 ## 3. Logging và tracing
 
@@ -71,7 +74,7 @@ python scripts/validate_logs.py
 - Version/label baseline: v1, labels `baseline` và `production` sau rollback.
 - Version/label candidate: v2, labels `candidate` và `latest` sau rollback.
 - Trace mỗi version: baseline v1 `686ab6ff4d29e9c63166872f3f02de45`; candidate v2 `8893a6f33bd250aa8f21850da9c6f410`. Evidence: [`evidence/cp2-prompt-baseline-trace.jpg`](evidence/cp2-prompt-baseline-trace.jpg), [`evidence/cp2-prompt-candidate-trace.jpg`](evidence/cp2-prompt-candidate-trace.jpg) và [`evidence/cp2-prompt-version-evidence.json`](evidence/cp2-prompt-version-evidence.json).
-- Rollback thật: gán `production` cho v2 và tạo trace `b248cf5fd57de58321ad05caffaf67b5`, sau đó chuyển `production` về v1 và tạo trace `7c127e4ab129ed90ced9a101720b380b`. Evidence: [`evidence/cp2-prompt-versions.jpg`](evidence/cp2-prompt-versions.jpg), [`evidence/cp2-prompt-rollback.json`](evidence/cp2-prompt-rollback.json).
+- Rollback thật: gán `production` cho v2 và tạo trace `b248cf5fd57de58321ad05caffaf67b5`, sau đó chuyển `production` về v1 và tạo trace `7c127e4ab129ed90ced9a101720b380b`. Ảnh trước/sau thật: [`evidence/cp2-prompt-production-v2-before-rollback.jpg`](evidence/cp2-prompt-production-v2-before-rollback.jpg), [`evidence/cp2-prompt-production-v1-after-rollback.jpg`](evidence/cp2-prompt-production-v1-after-rollback.jpg); đối chiếu [`evidence/cp2-prompt-rollback.json`](evidence/cp2-prompt-rollback.json).
 
 ## 5. Dashboard, SLO và alerts
 
@@ -92,9 +95,9 @@ python scripts/validate_logs.py
 ## 6. Điều tra challenge
 
 - Challenge ID: `day13-k4-observability-v1` (`rag_slow`, affected feature `monitoring`, threshold 2000 ms).
-- Triệu chứng từ metrics: P95 tăng từ 152 ms lên 2652 ms; error rate vẫn 0%. Sau disable/restart, P95 hồi phục về 151 ms. Evidence: [`evidence/cp3-metrics-incident.png`](evidence/cp3-metrics-incident.png), [`evidence/cp3-metrics-baseline.json`](evidence/cp3-metrics-baseline.json), [`evidence/cp3-metrics-incident.json`](evidence/cp3-metrics-incident.json), [`evidence/cp3-metrics-recovery.json`](evidence/cp3-metrics-recovery.json).
-- Trace ID liên quan: `e3231aac6ff949c43aad35d92239f822`; waterfall thật cho thấy `run=3621 ms`, `retrieve=2501 ms`, `generate=151 ms`. Evidence: [`evidence/cp3-trace-waterfall.jpg`](evidence/cp3-trace-waterfall.jpg), [`evidence/cp3-trace-summary.json`](evidence/cp3-trace-summary.json) và [`evidence/cp3-component-timing.json`](evidence/cp3-component-timing.json).
-- Log line/correlation ID liên quan: `req-b2233268`, `response_sent.latency_ms=3619`; ID này khớp metadata trace Langfuse. Xem [`evidence/cp3-correlated-log.json`](evidence/cp3-correlated-log.json).
+- Triệu chứng từ metrics: baseline P95 152 ms; trong lượt challenge có tracing, P95 tăng lên 3626 ms và error rate vẫn 0%. Sau disable/restart, P50 hồi phục 152 ms, P95 1127 ms (cold fetch managed prompt) và vẫn dưới SLO 3000 ms. Evidence: [`evidence/cp3-metrics-incident.png`](evidence/cp3-metrics-incident.png), [`evidence/cp3-metrics-baseline.json`](evidence/cp3-metrics-baseline.json), [`evidence/cp3-metrics-incident.json`](evidence/cp3-metrics-incident.json), [`evidence/cp3-metrics-recovery.json`](evidence/cp3-metrics-recovery.json).
+- Trace ID liên quan: `61a5c25ea8a6d57fce2a3c4ea16489df`; waterfall thật cho thấy `run=3628 ms`, `retrieve=2501 ms`, `generate=151 ms`. Evidence: [`evidence/cp3-trace-waterfall.jpg`](evidence/cp3-trace-waterfall.jpg), [`evidence/cp3-trace-summary.json`](evidence/cp3-trace-summary.json) và [`evidence/cp3-component-timing.json`](evidence/cp3-component-timing.json).
+- Log line/correlation ID liên quan: `req-49c5faf5`, `response_sent.latency_ms=3626`; metrics, trace và log đều thuộc cùng lượt challenge. Xem [`evidence/cp3-correlated-log.json`](evidence/cp3-correlated-log.json).
 - Root cause: incident `rag_slow` thêm khoảng 2.5 giây trong RAG retrieval. Retrieval chiếm khoảng 94.3% thời gian hai component. Việc gọi sync `agent.run()` trong async endpoint còn khuếch đại client tail latency khi concurrency cao.
 - Fix action: disable route chậm; dùng cache/fallback retrieval; áp dụng timeout/circuit breaker; đưa tác vụ blocking sang worker/thread pool phù hợp.
 - Preventive measure: giữ sub-span retrieval/generation, alert P95 theo feature, load test concurrency trong CI và theo dõi chênh lệch client/internal latency. Báo cáo đầy đủ: [`evidence/cp3-investigation.md`](evidence/cp3-investigation.md).
@@ -109,5 +112,5 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 | Huy (Thành viên B) | Recursive PII scrubbing, regex email/phone/CCCD/card/passport/address và security tests. | [Commit d8069a2](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/d8069a2) | Scrubber phải chạy trước serializer và cần negative test để không phá metadata kỹ thuật. |
 | Nguyễn Trần Nghĩa (Thành viên C) | `error_rate_pct` zero-safe, unit tests và dashboard spec 6 Golden Signals. | [Commit 77d7033](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/77d7033) | Percentile/error rate cần zero-safe; dashboard AI phải theo dõi thêm cost và quality. |
 | Hải (Thành viên D) | SLO và nền tảng runbook symptom-based; phần còn thiếu được hoàn thiện trong tích hợp CP2. | [Commit 167edaf](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/167edaf) | Alert nên dựa trên triệu chứng/SLO và có ba bước điều tra đầu tiên rõ ràng. |
-| Nguyễn Quang Hà (Thành viên E) | QA tích hợp, sub-span RAG/LLM, correlation trace metadata, dashboard runtime, Prompt Management, điều tra CP3 và tổng hợp evidence/report. | Commits `05b5ab8`, `868771b`, `f0302ce`, `c77f491`; xem [`BAO_CAO_THANH_VIEN_E.md`](BAO_CAO_THANH_VIEN_E.md) | Metrics phát hiện triệu chứng; waterfall khoanh vùng retrieval; correlation ID nối trace với log. API key thật chỉ lưu cục bộ trong `.env`, không commit. |
+| Nguyễn Quang Hà (Thành viên E) | QA tích hợp, sub-span RAG/LLM, correlation trace metadata, dashboard runtime, Prompt Management, điều tra CP3 và tổng hợp evidence/report. | Commits `05b5ab8`, `868771b`, `f0302ce`, `c77f491`, `b9ef61b`; xem [`BAO_CAO_THANH_VIEN_E.md`](BAO_CAO_THANH_VIEN_E.md) | Metrics phát hiện triệu chứng; waterfall khoanh vùng retrieval; correlation ID nối trace với log. API key thật chỉ lưu cục bộ trong `.env`, không commit. |
 

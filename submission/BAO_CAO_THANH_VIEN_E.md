@@ -13,14 +13,13 @@ QA & Chief Investigator: kiểm thử tích hợp, tracing cho RAG/LLM, điều 
 - Ban đầu chưa có `.env`; sau khi được chủ project cho phép đã tạo key thật, lưu cục bộ trong `.env` bị Git ignore và không đưa secret vào evidence/commit.
 - Xác nhận `config/challenge.json` là bản release K4, không chỉnh sửa file này.
 
-### CP0 — Setup & baseline sau merge
+### CP0 — Setup & baseline
 
 - Tạo và sử dụng `.venv` cục bộ; dependencies cài từ `requirements.txt`.
-- Chạy health check thật: API trả `ok=true`, tất cả incident tắt, tracing chưa bật vì chưa có key.
-- Chạy toàn bộ public tests: 48 tests pass, chỉ có 2 warning deprecation.
-- Evidence: `evidence/cp0-health.json`, `evidence/cp0-pytest.txt`.
-
-Lưu ý trung thực: baseline starter trước khi A/B/C/D sửa không còn trong working tree sau khi pull. Kết quả ghi ở đây là baseline tích hợp hiện tại, không giả lập lại điểm thấp của starter.
+- Phục dựng commit starter gốc `b95464c` trong thư mục tạm bị Git ignore, chạy API và 10 query thật.
+- Baseline thật: 30/100; 20 records thiếu required fields, 20 records thiếu enrichment, 0 correlation ID hợp lệ và cả 10 response trả `MISSING`.
+- Chạy health check bản hoàn thiện: API trả `ok=true`, tracing bật, tất cả incident tắt.
+- Evidence: `evidence/cp0-baseline-validator.txt`, `evidence/cp0-health.png`, `evidence/cp0-health.json`, `evidence/cp0-pytest.txt`.
 
 ### CP1 — Structured logging, correlation ID và PII
 
@@ -47,18 +46,18 @@ Lưu ý trung thực: baseline starter trước khi A/B/C/D sửa không còn tr
 - Dashboard runtime baseline đọc 21 log records trong cửa sổ 60 phút: P95 152 ms, 10 requests, error rate 0%, cost 0.021645 USD, 330/1377 tokens, quality 0.88.
 - Ảnh thật: `evidence/cp2-dashboard-6-panels.png`; HTML nguồn: `evidence/cp2-dashboard-runtime.html`.
 - Alert rules không còn TODO; mỗi rule có severity, symptom-based condition, owner và runbook.
-- Full test sau thay đổi CP2: 50 tests pass.
+- Full test sau thay đổi CP2 và renderer evidence: 51 tests pass.
 - Langfuse thật có 10 baseline traces; trace waterfall chứa `run/retrieve/generate` và metadata correlation ID.
 - Tạo prompt `day13-chat` v1 (`baseline`) và v2 (`candidate`), chạy trace cho từng version.
-- Gán `production` cho v2 để kiểm chứng rồi rollback về v1; lưu trace ID trước/sau và ảnh labels cuối.
+- Gán `production` cho v2 để kiểm chứng rồi rollback về v1; lưu trace ID và ảnh trạng thái thật trước/sau. Hai ảnh trace hiển thị trực tiếp `prompt_name`, `prompt_label`, `prompt_version`.
 
 ### CP3 — Điều tra challenge thật
 
 - Challenge: `day13-k4-observability-v1`, incident `rag_slow`, feature `monitoring`, threshold 2000 ms.
-- Metrics: P95 tăng từ 152 ms lên 2652 ms; error rate vẫn 0%; sau disable/restart P95 hồi phục về 151 ms.
+- Metrics: baseline P95 152 ms; lượt challenge có tracing tăng lên 3626 ms, error rate vẫn 0%; sau disable/restart P50 về 152 ms và P95 1127 ms, vẫn dưới SLO.
 - Component timing: `retrieve=2512.5 ms`, `generate=150.7 ms`; retrieval chiếm khoảng 94.3%.
-- Langfuse waterfall: trace `e3231aac6ff949c43aad35d92239f822`, `run=3621 ms`, `retrieve=2501 ms`, `generate=151 ms`.
-- Log: correlation ID `req-b2233268` nối đúng trace trên với `request_received` và `response_sent.latency_ms=3619`.
+- Langfuse waterfall: trace `61a5c25ea8a6d57fce2a3c4ea16489df`, `run=3628 ms`, `retrieve=2501 ms`, `generate=151 ms`.
+- Log: correlation ID `req-49c5faf5` nối đúng metrics/trace trên với `request_received` và `response_sent.latency_ms=3626` trong cùng lượt chạy.
 - Phát hiện thêm: client tail latency 8–13 giây do sync `agent.run()` block async event loop khi concurrency=5.
 - Root cause, mitigation, fix và preventive measure được ghi trong `evidence/cp3-investigation.md`.
 
@@ -70,7 +69,7 @@ Lưu ý trung thực: baseline starter trước khi A/B/C/D sửa không còn tr
 
 ### Nghiệm thu cuối
 
-- `pytest`: 50 passed, 2 warning deprecation; lần chạy đầu gặp lỗi quyền thư mục temp hệ thống Windows, chạy lại với `--basetemp` trong `.venv` đã pass đầy đủ.
-- `validate_logs.py`: 100/100 trên 87 records, 42 correlation IDs, PII leak = 0.
+- `pytest`: 51 passed, 2 warning deprecation; lần chạy đầu gặp lỗi quyền thư mục temp hệ thống Windows, chạy lại với `--basetemp` trong `.venv` đã pass đầy đủ.
+- `validate_logs.py`: 100/100 trên 111 records, 54 correlation IDs, PII leak = 0.
 - `validate_dashboard.py`: hợp lệ 6/6 panel.
 - `.env` và `.venv` đều bị Git ignore; secret scan file tracked không phát hiện key thật; `config/challenge.json` không khác `origin/main`.

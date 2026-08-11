@@ -1,17 +1,25 @@
 Lệnh bật incident:
-.\.venv\Scripts\python.exe scripts\inject_incident.py
+POST /incidents/rag_slow/enable
 
 Kết quả:
-200 {'ok': True, 'incidents': {'rag_slow': True, 'tool_fail': False, 'cost_spike': False}}
+200 {"ok": true, "incidents": {"rag_slow": true, "tool_fail": false, "cost_spike": false}}
 
 Lệnh challenge:
 .\.venv\Scripts\python.exe scripts\load_test.py --challenge --concurrency 5
 
 Challenge: day13-k4-observability-v1 | Cohort: K4
-[200] req-939a54c9 | monitoring | 7972.4ms
-[200] req-7329c82c | monitoring | 13283.3ms
-[200] req-f8db9e82 | monitoring | 13285.4ms
-[200] req-09ccc1bc | monitoring | 13286.1ms
-[200] req-84e0e47b | monitoring | 13285.5ms
+[200] req-49c5faf5 | monitoring | 7092.1ms
+[200] req-66181e87 | monitoring | 7081.7ms
+[200] req-efad863f | monitoring | 9747.9ms
+[200] req-5158cedf | monitoring | 15070.4ms
+[200] req-ad485e0d | monitoring | 15069.9ms
 
-Giải thích: latency nội bộ trong log là khoảng 2651–2652 ms/request. Client tail latency cao hơn do `agent.run()` đồng bộ được gọi trong async endpoint, làm các request concurrency phải chờ event loop lần lượt. Đây là yếu tố khuếch đại ngoài incident RAG 2.5 giây.
+Metrics cùng lượt:
+traffic=5, latency_p50=2654 ms, latency_p95=3626 ms, error_rate_pct=0.
+
+Trace/log được chọn:
+trace_id=61a5c25ea8a6d57fce2a3c4ea16489df
+correlation_id=req-49c5faf5
+trace_latency=3628 ms, log_latency=3626 ms, retrieve=2501 ms, generate=151 ms.
+
+Client tail latency cao hơn internal latency vì `agent.run()` đồng bộ được gọi trong async endpoint, khiến các request concurrency chờ event loop lần lượt.

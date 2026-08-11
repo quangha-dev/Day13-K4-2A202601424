@@ -17,7 +17,10 @@ def percentile(values: list[float], p: int) -> float:
 
 
 def load_records(
-    path: Path, window_minutes: int = 60, take_first: int | None = None
+    path: Path,
+    window_minutes: int = 60,
+    take_first: int | None = None,
+    take_last: int | None = None,
 ) -> list[dict]:
     records: list[dict] = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -32,6 +35,8 @@ def load_records(
 
     if take_first is not None:
         records = records[:take_first]
+    if take_last is not None:
+        records = records[-take_last:]
     if not records:
         return []
     newest = max(record["_timestamp"] for record in records)
@@ -167,9 +172,20 @@ def main() -> int:
         type=int,
         help="Chỉ dùng số record đầu tiên để tái tạo một snapshot evidence đã ghi nhận.",
     )
+    parser.add_argument(
+        "--take-last",
+        type=int,
+        help="Chỉ dùng số record cuối cùng để tạo snapshot của lượt chạy mới nhất.",
+    )
     args = parser.parse_args()
 
-    records = load_records(args.input, take_first=args.take_first)
+    if args.take_first is not None and args.take_last is not None:
+        parser.error("--take-first và --take-last không được dùng đồng thời")
+    records = load_records(
+        args.input,
+        take_first=args.take_first,
+        take_last=args.take_last,
+    )
     if not records:
         raise SystemExit(f"Không có log hợp lệ trong {args.input}")
     metrics = calculate(records)

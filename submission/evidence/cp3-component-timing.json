@@ -7,5 +7,5 @@
   "docs": [
     "Metrics detect incidents, traces localize them, logs explain root cause."
   ],
-  "note": "Phép đo runtime độc lập này khớp waterfall Langfuse: retrieve 2501 ms và generate 151 ms."
+  "note": "Phép đo runtime độc lập khớp waterfall cùng lượt challenge: retrieve 2501 ms và generate 151 ms."
 }

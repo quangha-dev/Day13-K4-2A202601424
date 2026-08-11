@@ -6,12 +6,13 @@
     "cost_spike": false
   },
   "traffic": 5,
-  "latency_p50": 151.0,
-  "latency_p95": 151.0,
-  "latency_p99": 151.0,
+  "latency_p50": 152.0,
+  "latency_p95": 1127.0,
+  "latency_p99": 1127.0,
   "error_rate_pct": 0.0,
-  "total_cost_usd": 0.0105,
+  "total_cost_usd": 0.0099,
   "tokens_in_total": 175,
-  "tokens_out_total": 666,
-  "quality_avg": 0.84
+  "tokens_out_total": 626,
+  "quality_avg": 0.84,
+  "note": "P95 gồm lần tải managed prompt đầu tiên sau restart; P50 152 ms và P95 vẫn dưới SLO 3000 ms."
 }

@@ -1,14 +1,14 @@
 # Kiểm kê evidence trước khi nộp
 
-Cập nhật sau lần chạy tích hợp và thu thập Langfuse thật ngày 11/08/2026. Ký hiệu: ✅ đã có và kiểm tra được; ⚠️ hạn chế lịch sử đã giải trình.
+Cập nhật sau lần chạy tích hợp và thu thập Langfuse thật ngày 11/08/2026. Ký hiệu: ✅ đã có và kiểm tra được.
 
 ## CP0 — Setup
 
 | Yêu cầu | Trạng thái | File |
 |---|---:|---|
-| Health/API chạy | ✅ | `evidence/cp0-health.json` |
+| Health/API chạy | ✅ | `evidence/cp0-health.png`, `evidence/cp0-health.json` |
 | Public tests pass | ✅ | `evidence/cp0-pytest.txt` |
-| Baseline starter trước khi sửa | ⚠️ | Không thể tái tạo trung thực sau khi đã pull code của A–D; report đã ghi rõ hạn chế này. Không nằm trong danh sách evidence bắt buộc của `SUBMISSION.md`. |
+| Baseline starter trước khi sửa | ✅ | `evidence/cp0-baseline-validator.txt` — phục dựng commit gốc `b95464c`, score 30/100. |
 
 ## CP1 — Logging, correlation ID và PII
 
@@ -33,15 +33,15 @@ Cập nhật sau lần chạy tích hợp và thu thập Langfuse thật ngày 1
 | Danh sách ít nhất 10 Langfuse traces | ✅ | `evidence/cp2-trace-list-10.jpg`, `evidence/cp2-trace-summary.json` |
 | Một trace waterfall có run/retrieve/generate | ✅ | `evidence/cp2-trace-waterfall.jpg` |
 | Prompt v1/v2 và labels | ✅ | `evidence/cp2-prompt-versions.jpg`, `evidence/cp2-prompt-version-evidence.json` |
-| Hai trace gắn đúng prompt version/label | ✅ | `evidence/cp2-prompt-baseline-trace.jpg`, `evidence/cp2-prompt-candidate-trace.jpg` |
-| Đổi label hoặc rollback production | ✅ | `evidence/cp2-prompt-rollback.json`, `evidence/cp2-prompt-versions.jpg` |
+| Hai trace gắn đúng prompt version/label | ✅ | `evidence/cp2-prompt-baseline-trace.jpg`, `evidence/cp2-prompt-candidate-trace.jpg` — thấy trực tiếp name/label/version. |
+| Đổi label hoặc rollback production | ✅ | `evidence/cp2-prompt-production-v2-before-rollback.jpg`, `evidence/cp2-prompt-production-v1-after-rollback.jpg`, `evidence/cp2-prompt-rollback.json` |
 
 ## CP3 — Challenge
 
 | Yêu cầu | Trạng thái | File |
 |---|---:|---|
 | Metrics baseline | ✅ | `evidence/cp3-metrics-baseline.json` |
-| Metrics incident | ✅ | `evidence/cp3-metrics-incident.json`, `evidence/cp3-metrics-incident.png` |
+| Metrics incident cùng lượt trace/log | ✅ | `evidence/cp3-metrics-incident.json`, `evidence/cp3-metrics-incident.png` |
 | Load test challenge thật | ✅ | `evidence/cp3-load-test.txt` |
 | Correlated log thật | ✅ | `evidence/cp3-correlated-log.json` |
 | Component timing thật | ✅ | `evidence/cp3-component-timing.json` |

@@ -1,8 +1,8 @@
 Lệnh nghiệm thu cuối:
-.\.venv\Scripts\python.exe -m pytest -q --basetemp=.venv\pytest-final-20260811
+.\.venv\Scripts\python.exe -m pytest -q --basetemp=.venv\pytest-submit2-20260811
 
 Kết quả:
-..................................................                       [100%]
-50 passed, 2 warnings in 2.03s
+...................................................                      [100%]
+51 passed, 2 warnings in 2.20s
 
 Hai warning là cảnh báo deprecation của FastAPI @app.on_event("startup"), không phải test failure.

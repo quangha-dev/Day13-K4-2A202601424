@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
+from pathlib import Path
 
-from scripts.render_dashboard import calculate, render
+from scripts.render_dashboard import calculate, load_records, render
 
 
 def test_runtime_dashboard_contains_six_required_panels() -> None:
@@ -33,3 +35,24 @@ def test_runtime_dashboard_contains_six_required_panels() -> None:
         assert panel_title in page
     assert "150 / 150 / 150 ms" in page
     assert "0.00% (0 lỗi)" in page
+
+
+def test_load_records_can_select_latest_run(tmp_path: Path) -> None:
+    path = tmp_path / "logs.jsonl"
+    path.write_text(
+        "\n".join(
+            json.dumps(
+                {
+                    "ts": f"2026-08-11T10:00:0{index}Z",
+                    "event": "request_received",
+                    "sequence": index,
+                }
+            )
+            for index in range(5)
+        ),
+        encoding="utf-8",
+    )
+
+    records = load_records(path, take_last=2)
+
+    assert [record["sequence"] for record in records] == [3, 4]

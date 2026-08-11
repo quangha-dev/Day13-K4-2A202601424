@@ -16,5 +16,8 @@
     "version_1": ["baseline", "production"],
     "version_2": ["candidate", "latest"]
   },
-  "screenshot": "cp2-prompt-versions.jpg"
+  "screenshots": {
+    "before_rollback": "cp2-prompt-production-v2-before-rollback.jpg",
+    "after_rollback": "cp2-prompt-production-v1-after-rollback.jpg"
+  }
 }

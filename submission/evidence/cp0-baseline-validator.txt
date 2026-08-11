@@ -1,0 +1,23 @@
+Baseline được phục dựng từ commit starter gốc `b95464c` trong thư mục tạm bị Git ignore.
+
+Lệnh chạy:
+uvicorn app.main:app --env-file .env
+python scripts/load_test.py
+python scripts/validate_logs.py
+
+Kết quả load test: 10/10 request HTTP 200 nhưng correlation_id đều là `MISSING`.
+
+--- Lab Verification Results ---
+Total log records analyzed: 21
+Records with missing required fields: 20
+Records with missing enrichment (context): 20
+Unique correlation IDs found: 0
+Potential PII leaks detected: 0
+
+--- Grading Scorecard (Estimates) ---
+- [FAILED] Missing required fields (ts, level, etc.)
+- [FAILED] Correlation ID propagation (less than 2 unique IDs)
+- [FAILED] Log enrichment (missing user_id_hash, etc.)
++ [PASSED] PII scrubbing
+
+Estimated Score: 30/100

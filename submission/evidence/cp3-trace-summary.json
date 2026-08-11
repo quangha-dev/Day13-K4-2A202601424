@@ -1,32 +1,35 @@
 {
-  "trace_id": "e3231aac6ff949c43aad35d92239f822",
-  "session_id": "k4-challenge-s01",
-  "correlation_id": "req-b2233268",
-  "timestamp_utc": "2026-08-11T09:47:03.688Z",
+  "trace_id": "61a5c25ea8a6d57fce2a3c4ea16489df",
+  "session_id": "k4-challenge-s02",
+  "correlation_id": "req-49c5faf5",
+  "timestamp_utc": "2026-08-11T10:25:49.329Z",
   "prompt_name": "day13-chat",
   "prompt_label": "production",
   "prompt_version": 1,
-  "trace_latency_ms": 3621,
+  "trace_latency_ms": 3628,
   "observations": [
     {
-      "id": "7b1559d94f7f07df",
+      "id": "deaab2a588452431",
       "name": "run",
       "type": "GENERATION",
-      "duration_ms": 3621
+      "duration_ms": 3628
     },
     {
-      "id": "aeca2237dce67172",
+      "id": "3a5a8aa1a0669718",
       "name": "retrieve",
       "type": "SPAN",
       "duration_ms": 2501
     },
     {
-      "id": "c2cc9d6fefa0b100",
+      "id": "f6b8549c4a6dd23a",
       "name": "generate",
       "type": "SPAN",
       "duration_ms": 151
     }
   ],
   "root_cause": "rag_slow làm retrieval tăng khoảng 2.5 giây",
+  "metrics_latency_p95_ms": 3626,
+  "log_latency_ms": 3626,
+  "same_run_verified": true,
   "screenshot": "cp3-trace-waterfall.jpg"
 }

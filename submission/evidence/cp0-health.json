@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "tracing_enabled": false,
+  "tracing_enabled": true,
   "incidents": {
     "rag_slow": false,
     "tool_fail": false,
