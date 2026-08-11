@@ -6,115 +6,74 @@ Contract chuẩn được lưu tại [`config/dashboard.yaml`](file:///d:/VSC/Vi
 
 ---
 
-## 1. Cơ sở Kỹ thuật: Mở rộng SRE Golden Signals cho GenAI
+## 1. So sánh 4 Golden Signals Truyền thống vs. 6 GenAI Golden Signals
 
-Hệ thống SRE truyền thống (Google SRE Book) định nghĩa **4 Golden Signals**: Latency, Traffic, Errors, Saturation. 
-Đối với ứng dụng **GenAI / LLM**, hệ thống mở rộng thành **6 GenAI Golden Signals**:
-
-```
-GenAI Observability = Latency + Traffic + Errors + Cost + Tokens + Quality Proxy
-```
-
-### Ánh xạ Tiêu chuẩn OpenTelemetry GenAI Semantic Conventions
-
-| Panel ID | Tên Panel (Dashboard) | OpenTelemetry GenAI Metric Standard | Event & Field Nguồn | Đơn vị & Ngưỡng SLO |
-| :--- | :--- | :--- | :--- | :--- |
-| `latency` | Latency percentiles | `gen_ai.client.operation.duration` | `response_sent` -> `latency_ms` | `ms` (`P95 <= 3000 ms`) |
-| `traffic` | Request traffic | `http.server.request.count` / RPM | `request_received` -> `event` | `RPM` (`rate >= 1 rpm`) |
-| `errors` | Error rate and breakdown | `gen_ai.client.error_rate` | `request_failed` -> `error_type` | `%` (`error_rate <= 2 %`) |
-| `cost` | Cost over time | `gen_ai.usage.cost` | `response_sent` -> `cost_usd` | `USD` (`total <= $2.5`) |
-| `tokens` | Input and output tokens | `gen_ai.usage.input_tokens` & `output_tokens` | `response_sent` -> `tokens_in`, `tokens_out` | `tokens` (`total <= 50000`) |
-| `quality` | Quality proxy | `gen_ai.quality.score` | `response_sent` -> `quality_score` | `score` (`mean >= 0.75`) |
+| Chỉ số | SRE Truyền thống (SOA / Web) | LLM Observability Extension (GenAI) | Rủi ro Kỹ thuật / Kinh tế khi bỏ qua |
+| :--- | :--- | :--- | :--- |
+| **Latency** | Phản ánh CPU/DB/RAM. Dùng Average hoặc P95. | Dùng phân vị P95/P99. Bắt buộc đo Time to First Token (TTFT) & Generation Time. | Khách hàng bị nghẽn do long-tail latency của thuật toán sinh token. |
+| **Traffic** | Thống kê số lượng Request/sec (QPS). | Thống kê Requests Per Minute (RPM) & Số lượng Agent Runs. | Bị che giấu các cuộc tấn công nhồi prompt hoặc vòng lặp vô tận (Loop bug). |
+| **Errors** | Đếm lỗi HTTP 5xx / 4xx từ Server. | Phân loại lỗi Kỹ thuật (5xx/429) & Lỗi Nghiệp vụ AI (Timeout/Schema Fail). | Bỏ sót các request trả về HTTP 200 OK nhưng bị rỗng hoặc rò rỉ lỗi. |
+| **Cost (Mới)** | Chi phí phần cứng cố định (hàng tháng). | Chi phí phi tuyến tính tính theo từng Token ($/1k tokens). | Bùng nổ chi phí tài khoản API chỉ trong vài phút (Runaway spend). |
+| **Tokens (Mới)**| Không tồn tại trong Web 2.0. | Phân tách Input Tokens (Prompt) vs Output Tokens (Completion). | Tràn bộ nhớ Context Window (Lost in the Middle) & nghẽn GPU Decode phase. |
+| **Quality (Mới)**| Giám sát Uptime (99.9% availability). | Phanh An toàn (Quality Proxy / LLM-as-a-judge score 0.0 - 1.0). | Mô hình AI trả về câu trả lời sai lệch (Hallucination) dù server vẫn 200 OK. |
 
 ---
 
-## 2. Cấu hình Chung (Global Dashboard Settings)
+## 2. Bảng Ánh xạ Tiêu chuẩn OpenTelemetry GenAI Semantic Conventions
 
-- **Source File**: `data/logs.jsonl`
-- **Time Range Mặc định**: 60 phút (`time_range_minutes: 60`)
-- **Refresh Interval**: 15 – 30 giây (`refresh_seconds: 30`)
-- **Phạm vi hiển thị**: Đúng 6 panel chính đại diện cho 6 nhóm chỉ số quan trọng.
+| Panel ID | Tên Panel (Dashboard) | OTel Metric Standard | Event Nguồn | Field Log Nguồn | Đơn vị | Ngưỡng SLO Target |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `latency` | Latency percentiles | `gen_ai.client.operation.duration` | `response_sent` | `latency_ms` | `ms` | $P95 \le 3000\text{ ms}$ |
+| `traffic` | Request traffic | `http.server.request.count` / RPM | `request_received` | `event` | `RPM` | $\text{Rate} \ge 1\text{ rpm}$ |
+| `errors` | Error rate and breakdown | `gen_ai.client.error_rate` | `request_failed` | `error_type` | `%` | $\text{Error Rate} \le 2\%$ |
+| `cost` | Cost over time | `gen_ai.usage.cost` | `response_sent` | `cost_usd` | `USD` | $\text{Total Cost} \le \$2.5$ |
+| `tokens` | Input and output tokens | `gen_ai.usage.input_tokens` & `output_tokens` | `response_sent` | `tokens_in`, `tokens_out` | `tokens` | $\text{Tokens} \le 50000$ |
+| `quality` | Quality proxy | `gen_ai.quality.score` | `response_sent` | `quality_score` | `score` | $\text{Mean} \ge 0.75$ |
 
 ---
 
-## 3. Chi tiết 6 Nhóm Panel
+## 3. Cấu hình Chi tiết 6 Panel Dashboard (Dashboard Contract Specification)
 
 ### 3.1. Latency Percentiles (`latency`)
-- **Title**: Latency percentiles
-- **Event nguồn**: `response_sent`
-- **Field nguồn**: `latency_ms`
-- **Aggregations**: `p50`, `p95`, `p99`
 - **Query / Formula**: `event == "response_sent" | percentile(latency_ms, [50, 95, 99])`
-- **Đơn vị**: `ms` (milliseconds)
-- **Threshold / SLO Line**: `p95 <= 3000 ms`
-- **Lý do Kỹ thuật**: Trong các hệ thống LLM, độ trễ sinh từ có hiện tượng "long-tail latency". Dùng phân vị P95 và P99 thay vì Average giúp phát hiện chính xác các request bị nghẽn mà không bị san bằng bởi các request ngắn.
+- **Lý do SRE**: Loại bỏ sai lệch của độ trễ trung bình. Phân vị P95 đảm bảo 95% khách hàng đạt trải nghiệm mượt mà dưới 3000ms.
 
 ### 3.2. Request Traffic (`traffic`)
-- **Title**: Request traffic
-- **Event nguồn**: `request_received`
-- **Field nguồn**: `event`
-- **Aggregations**: `count`, `rate_per_minute`
 - **Query / Formula**: `event == "request_received" | count() by 1m`
-- **Đơn vị**: `requests_per_minute` (RPM)
-- **Threshold / SLO Line**: `rate_per_minute >= 1`
-- **Lý do Kỹ thuật**: Giám sát lưu lượng thực tế để phát hiện sớm hiện tượng sụt giảm lưu lượng (Outage/Network drop) hoặc tăng vọt bất thường (Loop bug / DDoS).
+- **Lý do SRE**: Giám sát biến động lưu lượng thực tế (RPM) để phát hiện sự cố Outage (Drop) hoặc DDoS/Loop (Spike).
 
 ### 3.3. Error Rate & Breakdown (`errors`)
-- **Title**: Error rate and breakdown
-- **Event nguồn**: `request_received`, `request_failed`
-- **Field nguồn**: `error_type`
-- **Aggregations**: `error_rate_pct`, `count_by_value`
 - **Query / Formula**: `count(event == "request_failed") / count(event == "request_received") * 100; count_by(error_type)`
-- **Đơn vị**: `percent` (`%`)
-- **Threshold / SLO Line**: `error_rate_pct <= 2 %`
-- **Lý do Kỹ thuật**: Công thức tính toán Zero-safe:
-  $$\text{error\_rate\_pct} = \begin{cases} \left(\frac{\text{Total Errors}}{\text{TRAFFIC} + \text{Total Errors}}\right) \times 100 & \text{nếu Total Requests} > 0 \\ 0.0 & \text{nếu Total Requests} = 0 \end{cases}$$
-  Giúp đo lường chính xác tỷ lệ thất bại của hệ thống và phân loại nguyên nhân lỗi (Internal Server Error, Timeout, Rate Limit API, etc.).
+- **Công thức Zero-Safe**:
+  $$ErrorRate_{pct} = \begin{cases} \left(\frac{\sum ERRORS}{\text{TRAFFIC} + \sum ERRORS}\right) \times 100 & \text{nếu } (\text{TRAFFIC} + \sum ERRORS) > 0 \\ 0.0 & \text{nếu } (\text{TRAFFIC} + \sum ERRORS) = 0 \end{cases}$$
+- **Lý do SRE**: Đảm bảo không bị lỗi chia cho 0 khi khởi tạo và gom đủ cả System Errors lẫn Model/API Errors.
 
 ### 3.4. Cost Over Time (`cost`)
-- **Title**: Cost over time
-- **Event nguồn**: `response_sent`
-- **Field nguồn**: `cost_usd`
-- **Aggregations**: `sum_by_minute`, `total`
 - **Query / Formula**: `event == "response_sent" | sum(cost_usd) by 1m; sum(cost_usd)`
-- **Đơn vị**: `usd` (`$`)
-- **Threshold / SLO Line**: `total <= 2.5 USD`
-- **Lý do Kỹ thuật**: Mô hình GenAI phát sinh chi phí trực tiếp theo token. Cần kiểm soát tổng ngân sách chi trả cho LLM API trong cửa sổ 60 phút để tránh bùng nổ chi phí ngoài dự kiến.
+- **Lý do SRE**: Kiểm soát tổng chi phí tài khoản LLM API trong cửa sổ 60 phút, ngăn ngừa rủi ro tài chính phi tuyến tính.
 
 ### 3.5. Input & Output Tokens (`tokens`)
-- **Title**: Input and output tokens
-- **Event nguồn**: `response_sent`
-- **Field nguồn**: `tokens_in`, `tokens_out`
-- **Aggregations**: `sum_by_field`
+
+| Pha xử lý Token | Tên Field | Thuật toán GPU / Đặc tính | Chi phí Relative | Tác động Latency |
+| :--- | :--- | :--- | :--- | :--- |
+| **Prefill Phase (Prompt)** | `tokens_in` | Song song (*Parallel Compute*) | Rẻ hơn ($1\times$) | Tăng nhẹ thời gian TTFT |
+| **Decode Phase (Completion)**| `tokens_out` | Tự đẳng hồi (*Autoregressive Sequential*) | Đắt hơn ($3\times - 4\times$) | Tỷ lệ thuận trực tiếp với Latency sinh từ |
+
 - **Query / Formula**: `event == "response_sent" | sum(tokens_in), sum(tokens_out)`
-- **Đơn vị**: `tokens`
-- **Threshold / SLO Line**: `sum_by_field <= 50000 tokens`
-- **Lý do Kỹ thuật**: Phân tách rõ ràng giữa Input Tokens (Prompt / Context memory) và Output Tokens (Generation response). Output Tokens tiêu tốn nhiều thời gian xử lý và chi phí cao hơn đáng kể.
 
 ### 3.6. Quality Proxy (`quality`)
-- **Title**: Quality proxy
-- **Event nguồn**: `response_sent`
-- **Field nguồn**: `quality_score`
-- **Aggregations**: `mean`
 - **Query / Formula**: `event == "response_sent" | mean(quality_score)`
-- **Đơn vị**: `score_0_to_1` (Thang điểm 0.0 đến 1.0)
-- **Threshold / SLO Line**: `mean >= 0.75`
-- **Lý do Kỹ thuật**: Đo lường chất lượng câu trả lời từ AI (độ chính xác RAG, hallucination check hoặc user feedback) để đảm bảo mô hình không chỉ "chạy được" mà còn trả về nội dung có giá trị.
+- **Lý do SRE**: Đóng vai trò phanh an toàn (*Safety Guardrail*). Nếu chất lượng câu trả lời rơi xuống dưới 0.75, hệ thống sẽ cảnh báo sự thoái hóa của mô hình ngay cả khi HTTP status vẫn 200 OK.
 
 ---
 
-## 4. Quy trình Điều tra 3 Tầng Observability (Triad Workflow)
+## 4. Quy trình Điều tra Sự cố 3 Tầng Observability (Triad Workflow Matrix)
 
-Khi xảy ra sự cố (Incident), quy trình điều tra tiêu chuẩn được thực hiện qua 3 bước:
-
-```
-[1. Metrics Dashboard] ---> [2. Traces Waterfall] ---> [3. Structured JSON Logs]
-   Phát hiện bất thường        Định vị Span bị chậm/lỗi       Xem bằng chứng Root Cause (Redacted PII)
-```
-
-1. **Metrics Dashboard**: Quan sát panel bị vượt ngưỡng (Ví dụ: `latency` P95 > 3000ms hoặc `errors` > 2%).
-2. **Langfuse Traces**: Mở waterfall trace tìm span cụ thể bị chậm (Step Retrieval RAG hay Step LLM Call).
-3. **JSON Logs**: Lọc log theo `correlation_id` từ `data/logs.jsonl` để lấy bằng chứng root cause chi tiết.
+| Tầng Observability | Công cụ / Nguồn dữ liệu | Tác vụ trong OODA Loop | Hành động tiêu chuẩn của SRE |
+| :--- | :--- | :--- | :--- |
+| **Tầng 1: Metrics** | Dashboard 6 Panel (`data/logs.jsonl`) | **Phát hiện (Observe)** | Phát hiện chỉ số vọt ngưỡng SLO (VD: Latency P95 > 3000ms). |
+| **Tầng 2: Traces** | Langfuse Waterfall UI | **Định vị (Orient & Decide)** | Mở trace tương ứng, xác định Step bị chậm (`retrieve` RAG hay `generate` LLM). |
+| **Tầng 3: Logs** | Structured JSON Logs (`correlation_id`) | **Bằng chứng (Act)** | Trích xuất log chi tiết (đã redact PII) để xác nhận nguyên nhân gốc rễ (Root Cause). |
 
 ---
 
