@@ -37,7 +37,31 @@ def percentile(values: list[int], p: int) -> float:
 
 
 
+def reset_metrics() -> None:
+    global TRAFFIC
+    TRAFFIC = 0
+    REQUEST_LATENCIES.clear()
+    REQUEST_COSTS.clear()
+    REQUEST_TOKENS_IN.clear()
+    REQUEST_TOKENS_OUT.clear()
+    ERRORS.clear()
+    QUALITY_SCORES.clear()
+
+
 def snapshot() -> dict:
+    """Return a snapshot of accumulated metrics formatted for dashboard contracts.
+    
+    Aligned with OpenTelemetry GenAI Semantic Conventions:
+    - gen_ai.client.operation.duration -> latency_p50, latency_p95, latency_p99
+    - gen_ai.client.error_rate -> error_rate_pct (zero-safe, rounded to 2 decimals)
+    - gen_ai.usage.input_tokens / output_tokens -> tokens_in_total, tokens_out_total
+    - gen_ai.usage.cost -> total_cost_usd, avg_cost_usd
+    - gen_ai.quality.score -> quality_avg
+    """
+    total_errors = sum(ERRORS.values())
+    total_requests = TRAFFIC + total_errors
+    error_rate_pct = round((total_errors / total_requests) * 100, 2) if total_requests > 0 else 0.0
+
     return {
         "traffic": TRAFFIC,
         "latency_p50": percentile(REQUEST_LATENCIES, 50),
@@ -48,5 +72,8 @@ def snapshot() -> dict:
         "tokens_in_total": sum(REQUEST_TOKENS_IN),
         "tokens_out_total": sum(REQUEST_TOKENS_OUT),
         "error_breakdown": dict(ERRORS),
+        "error_rate_pct": error_rate_pct,
         "quality_avg": round(mean(QUALITY_SCORES), 4) if QUALITY_SCORES else 0.0,
     }
+
+
