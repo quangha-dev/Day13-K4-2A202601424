@@ -73,3 +73,4 @@ QA & Chief Investigator: kiểm thử tích hợp, tracing cho RAG/LLM, điều 
 - `validate_logs.py`: 100/100 trên 111 records, 54 correlation IDs, PII leak = 0.
 - `validate_dashboard.py`: hợp lệ 6/6 panel.
 - `.env` và `.venv` đều bị Git ignore; secret scan file tracked không phát hiện key thật; `config/challenge.json` không khác `origin/main`.
+- Commit chuẩn hóa toàn bộ evidence trước khi nộp: `9c335d9`.
