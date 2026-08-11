@@ -7,7 +7,7 @@
 - Commit hoàn tất kỹ thuật/evidence: `9c335d9`; khi nộp dùng SHA mới nhất từ `git rev-parse HEAD`.
 - Nhóm có 5 thành viên, được ánh xạ vào 4 workstream chính của README: Logging & PII (A, B); Tracing & Prompt Version (E); Dashboard/SLO/Alert (C, D); Incident/Report/Demo (E).
 - Thành viên và phần việc:
-  - Thành viên A (Raijuz): API & Middleware.
+  - Thành viên A (Nguyễn Nhật Quang): API & Middleware.
   - Thành viên B (Huy): Security Engineer.
   - Thành viên C (Nguyễn Trần Nghĩa): Metrics & Dashboard.
   - Thành viên D (Hải): SRE & Alerts Engineer.
@@ -29,44 +29,6 @@
 - Evidence PII redaction: [`evidence/cp1-pii-redacted.json`](evidence/cp1-pii-redacted.json) — email, số điện thoại và credit card đều được thay bằng marker.
 - Evidence trace waterfall: [`evidence/cp2-trace-waterfall.jpg`](evidence/cp2-trace-waterfall.jpg) hiển thị đầy đủ `run/retrieve/generate`.
 - Giải thích một span đáng chú ý: waterfall incident đo `retrieve=2501 ms`, `generate=151 ms`; retrieval là span gây chậm. Kết quả khớp phép đo runtime độc lập `retrieve=2512.5 ms`, `generate=150.7 ms`.
-
-### 3.1. Kết quả phần việc Security Engineer (Huy — Thành viên B)
-
-Phạm vi thực hiện gồm `app/pii.py`, processor `scrub_event` trong `app/logging_config.py` và kiểm thử tại `tests/test_pii.py`.
-
-- Bổ sung nhận diện passport và địa chỉ Việt Nam bên cạnh email, số điện thoại Việt Nam, CCCD và thẻ tín dụng.
-- Nâng `scrub_event` từ xử lý riêng `payload`/`event` thành scrub toàn bộ giá trị chuỗi trong log, bao gồm cấu trúc lồng nhau dạng `dict`, `list` và `tuple`.
-- Đăng ký `scrub_event` trong pipeline trước `JsonlFileProcessor` và `JSONRenderer`, bảo đảm PII được che trước khi log được ghi xuống file hoặc render ra output.
-- Bổ sung kiểm thử positive cho các định dạng PII và negative cases để giữ nguyên correlation ID, timestamp, tên model, token, cost và session ID hợp lệ.
-
-| Loại dữ liệu được kiểm thử | Marker đầu ra mong đợi |
-|---|---|
-| Email | `[REDACTED_EMAIL]` |
-| Điện thoại Việt Nam | `[REDACTED_PHONE_VN]` |
-| CCCD | `[REDACTED_CCCD]` |
-| Thẻ tín dụng | `[REDACTED_CREDIT_CARD]` |
-| Passport | `[REDACTED_PASSPORT]` |
-| Địa chỉ Việt Nam | `[REDACTED_ADDRESS_VI]` |
-
-Kết quả nghiệm thu cuối bằng `python scripts/validate_logs.py`:
-
-```text
-Total log records analyzed: 111
-Records with missing required fields: 0
-Records with missing enrichment (context): 0
-Unique correlation IDs found: 54
-Potential PII leaks detected: 0
-Estimated Score: 100/100
-```
-
-Lệnh kiểm tra phần việc:
-
-```bash
-python -m pytest tests/test_pii.py tests/test_validate_logs.py -q
-python scripts/validate_logs.py
-```
-
-Evidence kiểm chứng: [`evidence/cp1-pii-redacted.json`](evidence/cp1-pii-redacted.json) và [`evidence/cp1-validate-logs.txt`](evidence/cp1-validate-logs.txt).
 
 ## 4. Prompt versioning
 
@@ -108,7 +70,7 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 
 | Thành viên | Phần việc | Commit/PR | Điều đã học |
 |---|---|---|---|
-| Raijuz (Thành viên A) | Correlation ID middleware, enrichment, response headers, exception handling và load-test error path. | [Commit 103fc50](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/103fc50) | Contextvars phải được clear/bind theo request; error response vẫn cần correlation ID. |
+| Nguyễn Nhật Quang (Thành viên A) | Correlation ID middleware, enrichment, response headers, exception handling và load-test error path. | [Commit 103fc50](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/103fc50) | Contextvars phải được clear/bind theo request; error response vẫn cần correlation ID. |
 | Huy (Thành viên B) | Recursive PII scrubbing, regex email/phone/CCCD/card/passport/address và security tests. | [Commit d8069a2](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/d8069a2) | Scrubber phải chạy trước serializer và cần negative test để không phá metadata kỹ thuật. |
 | Nguyễn Trần Nghĩa (Thành viên C) | `error_rate_pct` zero-safe, unit tests và dashboard spec 6 Golden Signals. | [Commit 77d7033](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/77d7033) | Percentile/error rate cần zero-safe; dashboard AI phải theo dõi thêm cost và quality. |
 | Hải (Thành viên D) | SLO và nền tảng runbook symptom-based; phần còn thiếu được hoàn thiện trong tích hợp CP2. | [Commit 167edaf](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/167edaf) | Alert nên dựa trên triệu chứng/SLO và có ba bước điều tra đầu tiên rõ ràng. |
