@@ -1,83 +1,105 @@
 # Chi tiết Quy cách Dashboard & Tiêu chuẩn AI Observability (Dashboard Specification)
 
-Tài liệu này quy định chi tiết 6 nhóm panel cho **Day 13 AI Observability Dashboard**, tuân thủ theo tiêu chuẩn **Google SRE Golden Signals**, **OpenTelemetry GenAI Semantic Conventions** và **Datadog / Langfuse Observability Framework**.
+Tài liệu này quy định chi tiết cấu trúc Dashboard cho **Day 13 AI Observability Dashboard**, tuân thủ theo tiêu chuẩn **Google SRE Golden Signals**, **OpenTelemetry GenAI Semantic Conventions** và **Datadog / Langfuse Observability Framework**.
 
-Contract chuẩn được lưu tại [`config/dashboard.yaml`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/config/dashboard.yaml) và hướng dẫn thiết lập runtime tại [`docs/DASHBOARD_SETUP.md`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/docs/DASHBOARD_SETUP.md).
-
----
-
-## 1. So sánh 4 Golden Signals Truyền thống vs. 6 GenAI Golden Signals
-
-| Chỉ số | SRE Truyền thống (SOA / Web) | LLM Observability Extension (GenAI) | Rủi ro Kỹ thuật / Kinh tế khi bỏ qua |
-| :--- | :--- | :--- | :--- |
-| **Latency** | Phản ánh CPU/DB/RAM. Dùng Average hoặc P95. | Dùng phân vị P95/P99. Bắt buộc đo Time to First Token (TTFT) & Generation Time. | Khách hàng bị nghẽn do long-tail latency của thuật toán sinh token. |
-| **Traffic** | Thống kê số lượng Request/sec (QPS). | Thống kê Requests Per Minute (RPM) & Số lượng Agent Runs. | Bị che giấu các cuộc tấn công nhồi prompt hoặc vòng lặp vô tận (Loop bug). |
-| **Errors** | Đếm lỗi HTTP 5xx / 4xx từ Server. | Phân loại lỗi Kỹ thuật (5xx/429) & Lỗi Nghiệp vụ AI (Timeout/Schema Fail). | Bỏ sót các request trả về HTTP 200 OK nhưng bị rỗng hoặc rò rỉ lỗi. |
-| **Cost (Mới)** | Chi phí phần cứng cố định (hàng tháng). | Chi phí phi tuyến tính tính theo từng Token ($/1k tokens). | Bùng nổ chi phí tài khoản API chỉ trong vài phút (Runaway spend). |
-| **Tokens (Mới)**| Không tồn tại trong Web 2.0. | Phân tách Input Tokens (Prompt) vs Output Tokens (Completion). | Tràn bộ nhớ Context Window (Lost in the Middle) & nghẽn GPU Decode phase. |
-| **Quality (Mới)**| Giám sát Uptime (99.9% availability). | Phanh An toàn (Quality Proxy / LLM-as-a-judge score 0.0 - 1.0). | Mô hình AI trả về câu trả lời sai lệch (Hallucination) dù server vẫn 200 OK. |
+Contract chuẩn đáp ứng tự động hóa nằm tại [`config/dashboard.yaml`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/config/dashboard.yaml) và hướng dẫn thiết lập runtime tại [`docs/DASHBOARD_SETUP.md`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/docs/DASHBOARD_SETUP.md).
 
 ---
 
-## 2. Bảng Ánh xạ Tiêu chuẩn OpenTelemetry GenAI Semantic Conventions
+## 1. Cơ sở Kỹ thuật: Mở rộng SRE Golden Signals cho GenAI
 
-| Panel ID | Tên Panel (Dashboard) | OTel Metric Standard | Event Nguồn | Field Log Nguồn | Đơn vị | Ngưỡng SLO Target |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `latency` | Latency percentiles | `gen_ai.client.operation.duration` | `response_sent` | `latency_ms` | `ms` | $P95 \le 3000\text{ ms}$ |
-| `traffic` | Request traffic | `http.server.request.count` / RPM | `request_received` | `event` | `RPM` | $\text{Rate} \ge 1\text{ rpm}$ |
-| `errors` | Error rate and breakdown | `gen_ai.client.error_rate` | `request_failed` | `error_type` | `%` | $\text{Error Rate} \le 2\%$ |
-| `cost` | Cost over time | `gen_ai.usage.cost` | `response_sent` | `cost_usd` | `USD` | $\text{Total Cost} \le \$2.5$ |
-| `tokens` | Input and output tokens | `gen_ai.usage.input_tokens` & `output_tokens` | `response_sent` | `tokens_in`, `tokens_out` | `tokens` | $\text{Tokens} \le 50000$ |
-| `quality` | Quality proxy | `gen_ai.quality.score` | `response_sent` | `quality_score` | `score` | $\text{Mean} \ge 0.75$ |
+Hệ thống SRE truyền thống (Google SRE Book) định nghĩa **4 Golden Signals**: Latency, Traffic, Errors, Saturation. 
+Đối với ứng dụng **GenAI / LLM**, hệ thống mở rộng thành **6 Core GenAI Golden Signals** ở Tier-1 (bắt buộc) và các **Advanced Signals** ở Tier-2 (nâng cao).
+
+```
+GenAI Observability Core = Latency + Traffic + Errors + Cost + Tokens + Quality Proxy
+```
 
 ---
 
-## 3. Cấu hình Chi tiết 6 Panel Dashboard (Dashboard Contract Specification)
+## 2. Tier 1: 6 Panel Cốt lõi (Core Dashboard Contract)
 
-### 3.1. Latency Percentiles (`latency`)
-- **Query / Formula**: `event == "response_sent" | percentile(latency_ms, [50, 95, 99])`
-- **Lý do SRE**: Loại bỏ sai lệch của độ trễ trung bình. Phân vị P95 đảm bảo 95% khách hàng đạt trải nghiệm mượt mà dưới 3000ms.
+Được định nghĩa trong [`config/dashboard.yaml`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/config/dashboard.yaml) đảm bảo pass `python scripts/validate_dashboard.py` (báo `6/6 panel`).
 
-### 3.2. Request Traffic (`traffic`)
-- **Query / Formula**: `event == "request_received" | count() by 1m`
-- **Lý do SRE**: Giám sát biến động lưu lượng thực tế (RPM) để phát hiện sự cố Outage (Drop) hoặc DDoS/Loop (Spike).
-
-### 3.3. Error Rate & Breakdown (`errors`)
-- **Query / Formula**: `count(event == "request_failed") / count(event == "request_received") * 100; count_by(error_type)`
-- **Công thức Zero-Safe**:
-  $$ErrorRate_{pct} = \begin{cases} \left(\frac{\sum ERRORS}{\text{TRAFFIC} + \sum ERRORS}\right) \times 100 & \text{nếu } (\text{TRAFFIC} + \sum ERRORS) > 0 \\ 0.0 & \text{nếu } (\text{TRAFFIC} + \sum ERRORS) = 0 \end{cases}$$
-- **Lý do SRE**: Đảm bảo không bị lỗi chia cho 0 khi khởi tạo và gom đủ cả System Errors lẫn Model/API Errors.
-
-### 3.4. Cost Over Time (`cost`)
-- **Query / Formula**: `event == "response_sent" | sum(cost_usd) by 1m; sum(cost_usd)`
-- **Lý do SRE**: Kiểm soát tổng chi phí tài khoản LLM API trong cửa sổ 60 phút, ngăn ngừa rủi ro tài chính phi tuyến tính.
-
-### 3.5. Input & Output Tokens (`tokens`)
-
-| Pha xử lý Token | Tên Field | Thuật toán GPU / Đặc tính | Chi phí Relative | Tác động Latency |
+| Panel ID | Tên Panel (Dashboard) | OpenTelemetry GenAI Metric Standard | Event & Field Nguồn | Đơn vị & Ngưỡng SLO |
 | :--- | :--- | :--- | :--- | :--- |
-| **Prefill Phase (Prompt)** | `tokens_in` | Song song (*Parallel Compute*) | Rẻ hơn ($1\times$) | Tăng nhẹ thời gian TTFT |
-| **Decode Phase (Completion)**| `tokens_out` | Tự đẳng hồi (*Autoregressive Sequential*) | Đắt hơn ($3\times - 4\times$) | Tỷ lệ thuận trực tiếp với Latency sinh từ |
-
-- **Query / Formula**: `event == "response_sent" | sum(tokens_in), sum(tokens_out)`
-
-### 3.6. Quality Proxy (`quality`)
-- **Query / Formula**: `event == "response_sent" | mean(quality_score)`
-- **Lý do SRE**: Đóng vai trò phanh an toàn (*Safety Guardrail*). Nếu chất lượng câu trả lời rơi xuống dưới 0.75, hệ thống sẽ cảnh báo sự thoái hóa của mô hình ngay cả khi HTTP status vẫn 200 OK.
+| `latency` | Latency percentiles | `gen_ai.client.operation.duration` | `response_sent` -> `latency_ms` | `ms` (`P95 <= 3000 ms`) |
+| `traffic` | Request traffic | `http.server.request.count` / RPM | `request_received` -> `event` | `RPM` (`rate >= 1 rpm`) |
+| `errors` | Error rate and breakdown | `gen_ai.client.error_rate` | `request_failed` -> `error_type` | `%` (`error_rate <= 2 %`) |
+| `cost` | Cost over time | `gen_ai.usage.cost` | `response_sent` -> `cost_usd` | `USD` (`total <= $2.5`) |
+| `tokens` | Input and output tokens | `gen_ai.usage.input_tokens` & `output_tokens` | `response_sent` -> `tokens_in`, `tokens_out` | `tokens` (`total <= 50000`) |
+| `quality` | Quality proxy | `gen_ai.quality.score` | `response_sent` -> `quality_score` | `score` (`mean >= 0.75`) |
 
 ---
 
-## 4. Quy trình Điều tra Sự cố 3 Tầng Observability (Triad Workflow Matrix)
+## 3. Tier 2: 6 Panel Nâng cao cho Hệ thống GenAI Enterprise (Extended Observability)
 
-| Tầng Observability | Công cụ / Nguồn dữ liệu | Tác vụ trong OODA Loop | Hành động tiêu chuẩn của SRE |
-| :--- | :--- | :--- | :--- |
-| **Tầng 1: Metrics** | Dashboard 6 Panel (`data/logs.jsonl`) | **Phát hiện (Observe)** | Phát hiện chỉ số vọt ngưỡng SLO (VD: Latency P95 > 3000ms). |
-| **Tầng 2: Traces** | Langfuse Waterfall UI | **Định vị (Orient & Decide)** | Mở trace tương ứng, xác định Step bị chậm (`retrieve` RAG hay `generate` LLM). |
-| **Tầng 3: Logs** | Structured JSON Logs (`correlation_id`) | **Bằng chứng (Act)** | Trích xuất log chi tiết (đã redact PII) để xác nhận nguyên nhân gốc rễ (Root Cause). |
+Trong các hệ thống AI sản xuất quy mô lớn (Production Enterprise), bên cạnh 6 panel cơ bản, kiến trúc sư hệ thống thường bổ sung **6 Panel Nâng cao (Tier 2)** để tối ưu hóa sâu hiệu năng và chi phí:
+
+### 3.1. Time to First Token - TTFT (`time_to_first_token`)
+- **Metric OTel**: `gen_ai.client.time_to_first_token`
+- **Mô tả**: Độ trễ từ khi phát request đến khi nhận được token đầu tiên trên màn hình.
+- **Ý nghĩa Kỹ thuật**: Đây là thước đo trực tiếp quyết định trải nghiệm phản hồi nhanh (*Perceived Latency*) của người dùng trong các giao diện Streaming Chat.
+- **Ngưỡng khuyến nghị**: $TTFT_{P95} \le 800\text{ ms}$.
+
+### 3.2. RAG Vector Retrieval Latency (`rag_retrieval_latency`)
+- **Metric OTel**: `db.client.operation.duration` (Vector DB)
+- **Mô tả**: Thời gian thực hiện tìm kiếm ngữ cảnh liên quan trong Vector Database (Pinecone, Chroma, Qdrant).
+- **Ý nghĩa Kỹ thuật**: Phân tách độ trễ của bước RAG Search khỏi bước LLM Generation để định vị đúng điểm nghẽn.
+- **Ngưỡng khuyến nghị**: $P95 \le 300\text{ ms}$.
+
+### 3.3. Cost Attribution per Feature / User (`cost_attribution`)
+- **Metric OTel**: `gen_ai.usage.cost` grouped by `feature` or `user_id_hash`
+- **Mô tả**: Phân bổ chi phí tiêu tốn theo từng tính năng (`chat`, `monitoring`, `rag_agent`) hoặc từng user.
+- **Ý nghĩa Kỹ thuật**: Giúp phát hiện tính năng nào đang "ngốn" nhiều tiền nhất hoặc phát hiện các tài khoản user lạm dụng hệ thống.
+
+### 3.4. Token Generation Speed (`token_generation_speed`)
+- **Metric OTel**: `gen_ai.client.token_rate` (tokens/sec)
+- **Mô tả**: Tốc độ sinh ra từ của mô hình (Số token đầu ra trên mỗi giây).
+- **Ý nghĩa Kỹ thuật**: Giám sát hiệu năng của cụm GPU/Inference Server. Nếu chỉ số này sụt giảm, chứng tỏ cụm inference đang bị bão hòa tài nguyên.
+- **Ngưỡng khuyến nghị**: $\ge 25\text{ tokens/sec}$.
+
+### 3.5. Faithfulness & Grounding Score (`faithfulness_score`)
+- **Metric OTel**: `gen_ai.eval.faithfulness`
+- **Mô tả**: Điểm số LLM-as-a-Judge đánh giá độ trung thực của câu trả lời so với tài liệu RAG đã trích xuất.
+- **Ý nghĩa Kỹ thuật**: Bắt kịp các trường hợp Hallucination (AI "bốc phét" thông tin không có trong tài liệu).
+- **Ngưỡng khuyến nghị**: $\ge 0.85$.
+
+### 3.6. Prompt Token Ratio - Input/Output Ratio (`token_ratio`)
+- **Metric OTel**: `gen_ai.usage.input_tokens / gen_ai.usage.output_tokens`
+- **Mô tả**: Tỷ lệ giữa Token đầu vào (Prompt/Context) và Token đầu ra (Completion).
+- **Ý nghĩa Kỹ thuật**: Phát hiện hiện tượng "Context Bloating" (Prompt quá dài nhưng trả lời ngắn) hoặc hiện tượng "Runaway Output" (LLM bị lặp từ vô tận).
 
 ---
 
-## 5. Quy trình Kiểm tra & Nghiệm thu
+## 4. Mô hình Dashboard Tổng thể Enterprise (Full Dashboard Architecture)
+
+```
++-----------------------------------------------------------------------------------+
+|                        TIER 1: CORE GOLDEN SIGNALS (6 PANELS)                     |
+|  [1. Latency P95]   [2. Traffic RPM]   [3. Error Rate]   [4. Total Cost]          |
+|  [5. Token Usage]   [6. Quality Proxy]                                            |
++-----------------------------------------------------------------------------------+
+|                   TIER 2: ADVANCED ENTERPRISE EXTENSIONS (6 PANELS)               |
+|  [7. TTFT Streaming] [8. RAG Search Latency] [9. Cost by Feature/User]            |
+|  [10. Generation Speed] [11. Faithfulness Score] [12. Input/Output Token Ratio]   |
++-----------------------------------------------------------------------------------+
+```
+
+---
+
+## 5. Quy trình Điều tra 3 Tầng Observability (Triad Workflow)
+
+Khi xảy ra sự cố (Incident), quy trình điều tra tiêu chuẩn được thực hiện qua 3 bước:
+
+```
+[1. Metrics Dashboard] ---> [2. Traces Waterfall] ---> [3. Structured JSON Logs]
+   Phát hiện bất thường        Định vị Span bị chậm/lỗi       Xem bằng chứng Root Cause (Redacted PII)
+```
+
+---
+
+## 6. Quy trình Kiểm tra & Nghiệm thu
 
 1. **Kiểm tra Validator**:
    ```bash
