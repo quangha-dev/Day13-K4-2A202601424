@@ -33,7 +33,14 @@
 
 - Kết quả `validate_dashboard.py`: `HỢP LỆ: 6/6 panel có trong dashboard contract.`
 - Evidence dashboard: Quy cách chi tiết tại [`docs/dashboard-spec.md`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/docs/dashboard-spec.md) và contract [`config/dashboard.yaml`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/config/dashboard.yaml).
-- SLO đã chọn và lý do: Latency P95 <= 3000ms, Error rate <= 2%, Cost <= 2.5 USD, Tokens <= 50000, Quality score >= 0.75 (Tối ưu theo chuẩn OpenTelemetry GenAI Semantic Conventions).
+- SLO đã chọn và lý do: 
+  - Latency P95 <= 3000ms (Sử dụng P95 thay vì Average để loại bỏ bóp méo do hiện tượng long-tail latency đặc thù của LLM).
+  - Error rate <= 2% (Áp dụng công thức zero-safe hợp nhất cả System errors và Model/API errors).
+  - Total cost <= 2.5 USD (Giám sát rủi ro bùng nổ chi phí phi tuyến tính do prompt quá dài hoặc truy vấn lặp).
+  - Total tokens <= 50000 (Phân tách và kiểm soát Input Tokens vs Output Tokens để phát hiện nghẽn xử lý).
+  - Quality score >= 0.75 (Đóng vai trò phanh an toàn - Safety Guardrail - phát hiện sự thoái hóa chất lượng/hallucination ngay cả khi HTTP 200 OK).
+  - Tuân thủ toàn diện chuẩn quốc tế **OpenTelemetry GenAI Semantic Conventions**.
+
 - Alert rules và runbook:
 
 ## 6. Điều tra challenge
