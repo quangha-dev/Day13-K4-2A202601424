@@ -1,6 +1,6 @@
 # Kiểm kê evidence trước khi nộp
 
-Cập nhật sau lần chạy tích hợp thật ngày 11/08/2026. Ký hiệu: ✅ đã có và kiểm tra được; ❌ còn thiếu, không được khai báo hoàn tất khi chưa bổ sung.
+Cập nhật sau lần chạy tích hợp và thu thập Langfuse thật ngày 11/08/2026. Ký hiệu: ✅ đã có và kiểm tra được; ⚠️ hạn chế lịch sử đã giải trình.
 
 ## CP0 — Setup
 
@@ -8,7 +8,7 @@ Cập nhật sau lần chạy tích hợp thật ngày 11/08/2026. Ký hiệu: �
 |---|---:|---|
 | Health/API chạy | ✅ | `evidence/cp0-health.json` |
 | Public tests pass | ✅ | `evidence/cp0-pytest.txt` |
-| Baseline starter trước khi sửa | ❌ | Không thể tái tạo trung thực sau khi đã pull code của A–D; report đã ghi rõ hạn chế này. |
+| Baseline starter trước khi sửa | ⚠️ | Không thể tái tạo trung thực sau khi đã pull code của A–D; report đã ghi rõ hạn chế này. Không nằm trong danh sách evidence bắt buộc của `SUBMISSION.md`. |
 
 ## CP1 — Logging, correlation ID và PII
 
@@ -30,11 +30,11 @@ Cập nhật sau lần chạy tích hợp thật ngày 11/08/2026. Ký hiệu: �
 | SLO | ✅ | `../config/slo.yaml` |
 | Ba alert rules | ✅ | `../config/alert_rules.yaml` |
 | Ba runbook | ✅ | `../docs/alerts.md` |
-| Danh sách ít nhất 10 Langfuse traces | ❌ | Cần chụp `evidence/cp2-trace-list-10.png`. |
-| Một trace waterfall có run/retrieve/generate | ❌ | Cần chụp `evidence/cp2-trace-waterfall.png`. |
-| Prompt v1/v2 và labels | ❌ | Cần chụp `evidence/cp2-prompt-versions.png`. |
-| Hai trace gắn đúng prompt version/label | ❌ | Cần `evidence/cp2-prompt-baseline-trace.png` và `evidence/cp2-prompt-candidate-trace.png`. |
-| Đổi label hoặc rollback production | ❌ | Cần chụp `evidence/cp2-prompt-rollback.png`. |
+| Danh sách ít nhất 10 Langfuse traces | ✅ | `evidence/cp2-trace-list-10.jpg`, `evidence/cp2-trace-summary.json` |
+| Một trace waterfall có run/retrieve/generate | ✅ | `evidence/cp2-trace-waterfall.jpg` |
+| Prompt v1/v2 và labels | ✅ | `evidence/cp2-prompt-versions.jpg`, `evidence/cp2-prompt-version-evidence.json` |
+| Hai trace gắn đúng prompt version/label | ✅ | `evidence/cp2-prompt-baseline-trace.jpg`, `evidence/cp2-prompt-candidate-trace.jpg` |
+| Đổi label hoặc rollback production | ✅ | `evidence/cp2-prompt-rollback.json`, `evidence/cp2-prompt-versions.jpg` |
 
 ## CP3 — Challenge
 
@@ -47,12 +47,10 @@ Cập nhật sau lần chạy tích hợp thật ngày 11/08/2026. Ký hiệu: �
 | Component timing thật | ✅ | `evidence/cp3-component-timing.json` |
 | Root cause/fix/prevention | ✅ | `evidence/cp3-investigation.md` |
 | Recovery | ✅ | `evidence/cp3-metrics-recovery.json` |
-| Trace waterfall/trace ID Langfuse của incident | ❌ | Cần chụp `evidence/cp3-trace-waterfall.png` và ghi trace ID vào report. |
+| Trace waterfall/trace ID Langfuse của incident | ✅ | `evidence/cp3-trace-waterfall.jpg`, `evidence/cp3-trace-summary.json` |
 
-## Việc bắt buộc trước khi push/nộp
+## Việc trước khi push/nộp
 
-1. Đăng nhập hoặc cung cấp project credentials Langfuse trong `.env` cục bộ.
-2. Tạo prompt `day13-chat` v1/v2, labels baseline/candidate/production và thực hiện rollback thật.
-3. Restart API với `.env`, chạy load test để có ≥10 traces, sau đó chạy lại challenge để lấy waterfall incident.
-4. Bổ sung sáu ảnh Langfuse còn thiếu và thay các dòng “Chưa có/Chưa thu thập” trong `REPORT.md`.
-5. Chạy lại tests, validators, secret/PII scan và cập nhật SHA nộp cuối.
+1. Chạy lại tests, validators và secret/PII scan lần cuối.
+2. Dùng `git status --short` kiểm tra `.env`, `.venv`, cache và log runtime không nằm trong commit.
+3. Sau khi tự push, lấy SHA mới nhất bằng `git rev-parse HEAD` để nộp cùng URL repository.

@@ -1,0 +1,20 @@
+{
+  "action": "Gán production cho v2 để kiểm chứng, sau đó rollback production về v1",
+  "before_rollback": {
+    "production_version": 2,
+    "trace_id": "b248cf5fd57de58321ad05caffaf67b5",
+    "correlation_id": "req-a6987a63",
+    "trace_prompt_label": "production"
+  },
+  "after_rollback": {
+    "production_version": 1,
+    "trace_id": "7c127e4ab129ed90ced9a101720b380b",
+    "correlation_id": "req-171d69f3",
+    "trace_prompt_label": "production"
+  },
+  "final_labels": {
+    "version_1": ["baseline", "production"],
+    "version_2": ["candidate", "latest"]
+  },
+  "screenshot": "cp2-prompt-versions.jpg"
+}

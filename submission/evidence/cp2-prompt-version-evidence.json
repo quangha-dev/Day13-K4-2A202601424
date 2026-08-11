@@ -1,0 +1,24 @@
+{
+  "prompt_name": "day13-chat",
+  "versions_after_rollback": [
+    {
+      "version": 1,
+      "labels": ["baseline", "production"],
+      "trace_id": "686ab6ff4d29e9c63166872f3f02de45",
+      "trace_label": "baseline",
+      "correlation_id": "req-224036d0"
+    },
+    {
+      "version": 2,
+      "labels": ["candidate", "latest"],
+      "trace_id": "8893a6f33bd250aa8f21850da9c6f410",
+      "trace_label": "candidate",
+      "correlation_id": "req-7df8f7f9"
+    }
+  ],
+  "screenshots": [
+    "cp2-prompt-versions.jpg",
+    "cp2-prompt-baseline-trace.jpg",
+    "cp2-prompt-candidate-trace.jpg"
+  ]
+}

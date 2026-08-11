@@ -11,13 +11,13 @@
 
 - Code đã gắn `@observe(as_type="span")` cho `retrieve` và `generate`.
 - Phép đo runtime cùng scenario cho thấy `retrieve=2512.5 ms`, `generate=150.7 ms`; retrieval chiếm khoảng **94.3%** tổng thời gian hai component.
-- Waterfall/trace ID Langfuse chưa thể lấy vì máy tích hợp chưa có key và trình duyệt dừng ở trang đăng nhập. Không tạo trace ID giả.
-- Evidence tạm thời có thể kiểm chứng: `cp3-component-timing.json`. Evidence Langfuse bắt buộc vẫn phải bổ sung sau khi cấu hình key thật.
+- Waterfall Langfuse thật của trace `e3231aac6ff949c43aad35d92239f822` cho thấy `run=3621 ms`, `retrieve=2501 ms`, `generate=151 ms`, correlation ID `req-b2233268`.
+- Evidence: `cp3-component-timing.json`, `cp3-trace-summary.json`, `cp3-trace-waterfall.jpg`.
 
 ## 3. Logs — chứng minh request bị ảnh hưởng
 
-- Control log xác nhận `incident_enabled` với payload `rag_slow` lúc `2026-08-11T09:19:15.326710Z`.
-- Request `req-939a54c9`, feature `monitoring`, session `k4-challenge-s05` có `response_sent.latency_ms=2651`.
+- Control log xác nhận `incident_enabled` với payload `rag_slow` lúc `2026-08-11T09:47:03.064950Z`.
+- Request `req-b2233268`, feature `monitoring`, session `k4-challenge-s01` có `response_sent.latency_ms=3619` và khớp metadata trace Langfuse.
 - Bốn request challenge còn lại đều có latency nội bộ 2651–2652 ms.
 - Evidence: `cp3-correlated-log.json`, `cp3-load-test.txt`.
 
