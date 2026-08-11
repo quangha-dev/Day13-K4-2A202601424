@@ -1,0 +1,12 @@
+{
+  "phase": "baseline",
+  "traffic": 10,
+  "latency_p50": 151.0,
+  "latency_p95": 152.0,
+  "latency_p99": 152.0,
+  "error_rate_pct": 0.0,
+  "total_cost_usd": 0.0216,
+  "tokens_in_total": 330,
+  "tokens_out_total": 1377,
+  "quality_avg": 0.88
+}

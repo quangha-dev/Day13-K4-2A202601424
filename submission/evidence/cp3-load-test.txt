@@ -1,0 +1,17 @@
+Lệnh bật incident:
+.\.venv\Scripts\python.exe scripts\inject_incident.py
+
+Kết quả:
+200 {'ok': True, 'incidents': {'rag_slow': True, 'tool_fail': False, 'cost_spike': False}}
+
+Lệnh challenge:
+.\.venv\Scripts\python.exe scripts\load_test.py --challenge --concurrency 5
+
+Challenge: day13-k4-observability-v1 | Cohort: K4
+[200] req-939a54c9 | monitoring | 7972.4ms
+[200] req-7329c82c | monitoring | 13283.3ms
+[200] req-f8db9e82 | monitoring | 13285.4ms
+[200] req-09ccc1bc | monitoring | 13286.1ms
+[200] req-84e0e47b | monitoring | 13285.5ms
+
+Giải thích: latency nội bộ trong log là khoảng 2651–2652 ms/request. Client tail latency cao hơn do `agent.run()` đồng bộ được gọi trong async endpoint, làm các request concurrency phải chờ event loop lần lượt. Đây là yếu tố khuếch đại ngoài incident RAG 2.5 giây.

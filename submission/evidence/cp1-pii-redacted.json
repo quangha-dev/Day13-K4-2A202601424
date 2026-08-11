@@ -1,0 +1,14 @@
+[
+  {
+    "correlation_id": "req-df839ca4",
+    "message_preview": "What is your refund policy? My email is [REDACTED_EMAIL]"
+  },
+  {
+    "correlation_id": "req-4235b7b9",
+    "message_preview": "Here is my phone [REDACTED_PHONE_VN], what should be logged?"
+  },
+  {
+    "correlation_id": "req-276caa1d",
+    "message_preview": "What is the policy for PII and credit card [REDACTED_CREDIT_CARD]?"
+  }
+]

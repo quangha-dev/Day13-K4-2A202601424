@@ -1,0 +1,9 @@
+Lệnh chạy:
+.\.venv\Scripts\python.exe scripts\validate_dashboard.py
+
+Kết quả:
+HỢP LỆ: 6/6 panel có trong dashboard contract.
+
+Dashboard runtime được render từ data/logs.jsonl bằng scripts/render_dashboard.py.
+Ảnh: cp2-dashboard-6-panels.png
+HTML có thể kiểm tra: cp2-dashboard-runtime.html

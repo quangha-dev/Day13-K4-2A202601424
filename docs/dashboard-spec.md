@@ -2,7 +2,7 @@
 
 Tài liệu này quy định chi tiết cấu trúc Dashboard cho **Day 13 AI Observability Dashboard**, tuân thủ theo tiêu chuẩn **Google SRE Golden Signals**, **OpenTelemetry GenAI Semantic Conventions**, **Datadog LLM Observability** và **Langfuse Observability Framework**.
 
-Contract chuẩn đáp ứng tự động hóa nằm tại [`config/dashboard.yaml`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/config/dashboard.yaml) và hướng dẫn thiết lập runtime tại [`docs/DASHBOARD_SETUP.md`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/docs/DASHBOARD_SETUP.md).
+Contract chuẩn đáp ứng tự động hóa nằm tại [`config/dashboard.yaml`](../config/dashboard.yaml) và hướng dẫn thiết lập runtime tại [`docs/DASHBOARD_SETUP.md`](DASHBOARD_SETUP.md).
 
 ---
 
@@ -66,7 +66,7 @@ Nhằm tối ưu hóa khả năng quan sát cho các đối tượng sử dụng
 
 ## 3. Tier 1: 6 Panel Cốt lõi (Core Dashboard Contract)
 
-Được định nghĩa trong [`config/dashboard.yaml`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/config/dashboard.yaml) đảm bảo pass `python scripts/validate_dashboard.py` (báo `6/6 panel`).
+Được định nghĩa trong [`config/dashboard.yaml`](../config/dashboard.yaml) đảm bảo pass `python scripts/validate_dashboard.py` (báo `6/6 panel`).
 
 ### 3.1. Latency Percentiles (`latency`)
 - **Title**: Latency percentiles

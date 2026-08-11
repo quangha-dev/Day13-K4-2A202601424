@@ -1,0 +1,11 @@
+{
+  "scenario": "rag_slow",
+  "measurement": "direct timing of observed component implementations",
+  "retrieve_ms": 2512.5,
+  "generate_ms": 150.7,
+  "retrieve_share_pct": 94.3,
+  "docs": [
+    "Metrics detect incidents, traces localize them, logs explain root cause."
+  ],
+  "note": "Phép đo runtime độc lập này khớp waterfall Langfuse: retrieve 2501 ms và generate 151 ms."
+}

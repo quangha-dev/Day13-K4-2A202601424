@@ -1,0 +1,17 @@
+{
+  "phase": "recovery-after-disable-and-restart",
+  "incidents": {
+    "rag_slow": false,
+    "tool_fail": false,
+    "cost_spike": false
+  },
+  "traffic": 5,
+  "latency_p50": 151.0,
+  "latency_p95": 151.0,
+  "latency_p99": 151.0,
+  "error_rate_pct": 0.0,
+  "total_cost_usd": 0.0105,
+  "tokens_in_total": 175,
+  "tokens_out_total": 666,
+  "quality_avg": 0.84
+}

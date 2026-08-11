@@ -2,24 +2,30 @@
 
 ## 1. Thông tin nhóm
 
-- Tên nhóm: `[TỰ ĐIỀN]`
-- Repository URL: `[TỰ ĐIỀN]`
-- Commit SHA cuối: `[TỰ ĐIỀN SAU KHI HOÀN TẤT BÀI]`
-- Thành viên và vai trò: `[TỰ ĐIỀN DANH SÁCH NHÓM]`
+- Tên nhóm: K4-DAY13-2A202601424
+- Repository URL: https://github.com/quangha-dev/Day13-K4-2A202601424
+- Commit SHA kỹ thuật dùng làm mốc: `c77f491`; khi nộp lấy SHA mới nhất bằng `git rev-parse HEAD`.
+- Thành viên và vai trò:
+  - Thành viên A (Raijuz): API & Middleware.
+  - Thành viên B (Huy): Security Engineer.
+  - Thành viên C (Nguyễn Trần Nghĩa): Metrics & Dashboard.
+  - Thành viên D (Hải): SRE & Alerts Engineer.
+  - Thành viên E (Nguyễn Quang Hà): QA & Chief Investigator.
 
 ## 2. Kết quả kỹ thuật
 
-- Điểm `validate_logs.py`: `100/100` (23 log records, kiểm tra ngày 11/08/2026)
-- Tổng số traces:
-- Số PII leak còn lại: `0`
-- Link/đường dẫn dashboard:
+- Điểm `validate_logs.py`: 100/100 — [`evidence/cp1-validate-logs.txt`](evidence/cp1-validate-logs.txt)
+- Tổng số traces: đã xác minh hơn 10 traces; riêng baseline có 10 trace ID trong [`evidence/cp2-trace-summary.json`](evidence/cp2-trace-summary.json) và ảnh danh sách [`evidence/cp2-trace-list-10.jpg`](evidence/cp2-trace-list-10.jpg).
+- Số PII leak còn lại: 0.
+- Link/đường dẫn dashboard: [`../config/dashboard.yaml`](../config/dashboard.yaml) và [`evidence/cp2-dashboard-6-panels.png`](evidence/cp2-dashboard-6-panels.png).
+- Public tests: 50 tests pass, 2 warning deprecation không ảnh hưởng kết quả.
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID:
-- Evidence PII redaction: `[TỰ ĐIỀN ĐƯỜNG DẪN ẢNH, ví dụ: evidence/pii-redaction.png]`
-- Evidence trace waterfall:
-- Giải thích một span đáng chú ý:
+- Evidence correlation ID: [`evidence/cp1-correlation-log.json`](evidence/cp1-correlation-log.json) — `request_received` và `response_sent` cùng ID `req-df839ca4`.
+- Evidence PII redaction: [`evidence/cp1-pii-redacted.json`](evidence/cp1-pii-redacted.json) — email, số điện thoại và credit card đều được thay bằng marker.
+- Evidence trace waterfall: [`evidence/cp2-trace-waterfall.jpg`](evidence/cp2-trace-waterfall.jpg) hiển thị đầy đủ `run/retrieve/generate`.
+- Giải thích một span đáng chú ý: waterfall incident đo `retrieve=2501 ms`, `generate=151 ms`; retrieval là span gây chậm. Kết quả khớp phép đo runtime độc lập `retrieve=2512.5 ms`, `generate=150.7 ms`.
 
 ### 3.1. Kết quả phần việc Security Engineer (Huy — Thành viên B)
 
@@ -61,16 +67,16 @@ python scripts/validate_logs.py
 
 ## 4. Prompt versioning
 
-- Prompt name:
-- Version/label baseline:
-- Version/label candidate:
-- Trace ID của mỗi version:
-- Bằng chứng đổi label hoặc rollback:
+- Prompt name: `day13-chat` trên project Langfuse thật.
+- Version/label baseline: v1, labels `baseline` và `production` sau rollback.
+- Version/label candidate: v2, labels `candidate` và `latest` sau rollback.
+- Trace mỗi version: baseline v1 `686ab6ff4d29e9c63166872f3f02de45`; candidate v2 `8893a6f33bd250aa8f21850da9c6f410`. Evidence: [`evidence/cp2-prompt-baseline-trace.jpg`](evidence/cp2-prompt-baseline-trace.jpg), [`evidence/cp2-prompt-candidate-trace.jpg`](evidence/cp2-prompt-candidate-trace.jpg) và [`evidence/cp2-prompt-version-evidence.json`](evidence/cp2-prompt-version-evidence.json).
+- Rollback thật: gán `production` cho v2 và tạo trace `b248cf5fd57de58321ad05caffaf67b5`, sau đó chuyển `production` về v1 và tạo trace `7c127e4ab129ed90ced9a101720b380b`. Evidence: [`evidence/cp2-prompt-versions.jpg`](evidence/cp2-prompt-versions.jpg), [`evidence/cp2-prompt-rollback.json`](evidence/cp2-prompt-rollback.json).
 
 ## 5. Dashboard, SLO và alerts
 
 - Kết quả `validate_dashboard.py`: `HỢP LỆ: 6/6 panel có trong dashboard contract.`
-- Evidence dashboard: Quy cách chi tiết tại [`docs/dashboard-spec.md`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/docs/dashboard-spec.md) và contract [`config/dashboard.yaml`](file:///d:/VSC/VinAI_ThucChien/Lab/Day13-K4-2A202601424/config/dashboard.yaml). Đã thiết lập dựa trên **4 Trụ cột AI Observability (Performance, Cost, Quality, Reliability)** và **Mô hình Dashboard 3 Layer cho Stakeholders**:
+- Evidence dashboard: [`evidence/cp2-dashboard-6-panels.png`](evidence/cp2-dashboard-6-panels.png), [`evidence/cp2-dashboard-runtime.html`](evidence/cp2-dashboard-runtime.html) và [`evidence/cp2-dashboard-validator.txt`](evidence/cp2-dashboard-validator.txt). Quy cách tại [`../docs/dashboard-spec.md`](../docs/dashboard-spec.md) và contract [`../config/dashboard.yaml`](../config/dashboard.yaml). Dashboard được tạo từ log runtime thật và thể hiện **4 Trụ cột AI Observability (Performance, Cost, Quality, Reliability)**:
   - **Layer 1 (Overview - Leadership)**: Sức khỏe hệ thống tổng thể, Uptime, Total Spend, CSAT/Quality score.
   - **Layer 2 (Detail - Engineering)**: 6 Tier-1 Core Golden Signals (Latency P95, Traffic RPM, Error Rate %, Total Cost USD, Input/Output Tokens, Quality Score) + Tier-2 Enterprise Metrics (TTFT, RAG Search Latency, Cost by Feature, Token Speed).
   - **Layer 3 (Drill-down - Debugging)**: Langfuse Traces Waterfall & Structured JSON Logs Search via `correlation_id`.
@@ -81,17 +87,17 @@ python scripts/validate_logs.py
   - Total tokens <= 50000 (Phân tách và kiểm soát Input Tokens vs Output Tokens để phát hiện nghẽn xử lý).
   - Quality score >= 0.75 (Đóng vai trò phanh an toàn - Safety Guardrail - phát hiện sự thoái hóa chất lượng/hallucination ngay cả khi HTTP 200 OK).
 
-- Alert rules và runbook:
+- Alert rules và runbook: [`../config/alert_rules.yaml`](../config/alert_rules.yaml) và [`../docs/alerts.md`](../docs/alerts.md). Ba rule gồm high latency P95, elevated error rate và cost budget exceeded; đều symptom-based, có owner và ba bước điều tra đầu tiên.
 
 ## 6. Điều tra challenge
 
-- Challenge ID:
-- Triệu chứng từ metrics:
-- Trace ID liên quan:
-- Log line/correlation ID liên quan:
-- Root cause:
-- Fix action:
-- Preventive measure:
+- Challenge ID: `day13-k4-observability-v1` (`rag_slow`, affected feature `monitoring`, threshold 2000 ms).
+- Triệu chứng từ metrics: P95 tăng từ 152 ms lên 2652 ms; error rate vẫn 0%. Sau disable/restart, P95 hồi phục về 151 ms. Evidence: [`evidence/cp3-metrics-incident.png`](evidence/cp3-metrics-incident.png), [`evidence/cp3-metrics-baseline.json`](evidence/cp3-metrics-baseline.json), [`evidence/cp3-metrics-incident.json`](evidence/cp3-metrics-incident.json), [`evidence/cp3-metrics-recovery.json`](evidence/cp3-metrics-recovery.json).
+- Trace ID liên quan: `e3231aac6ff949c43aad35d92239f822`; waterfall thật cho thấy `run=3621 ms`, `retrieve=2501 ms`, `generate=151 ms`. Evidence: [`evidence/cp3-trace-waterfall.jpg`](evidence/cp3-trace-waterfall.jpg), [`evidence/cp3-trace-summary.json`](evidence/cp3-trace-summary.json) và [`evidence/cp3-component-timing.json`](evidence/cp3-component-timing.json).
+- Log line/correlation ID liên quan: `req-b2233268`, `response_sent.latency_ms=3619`; ID này khớp metadata trace Langfuse. Xem [`evidence/cp3-correlated-log.json`](evidence/cp3-correlated-log.json).
+- Root cause: incident `rag_slow` thêm khoảng 2.5 giây trong RAG retrieval. Retrieval chiếm khoảng 94.3% thời gian hai component. Việc gọi sync `agent.run()` trong async endpoint còn khuếch đại client tail latency khi concurrency cao.
+- Fix action: disable route chậm; dùng cache/fallback retrieval; áp dụng timeout/circuit breaker; đưa tác vụ blocking sang worker/thread pool phù hợp.
+- Preventive measure: giữ sub-span retrieval/generation, alert P95 theo feature, load test concurrency trong CI và theo dõi chênh lệch client/internal latency. Báo cáo đầy đủ: [`evidence/cp3-investigation.md`](evidence/cp3-investigation.md).
 
 ## 7. Đóng góp cá nhân
 
@@ -99,6 +105,9 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 
 | Thành viên | Phần việc | Commit/PR | Điều đã học |
 |---|---|---|---|
-| Huy (Thành viên B) | **Security Engineer — PII Redaction**: Bổ sung regex passport/địa chỉ Việt Nam; scrub đệ quy mọi trường string trong `dict`, `list`, `tuple`; đưa processor scrub vào logging pipeline trước bước ghi/render JSON; bổ sung test matrix và negative cases bảo vệ dữ liệu kỹ thuật. | [Commit d8069a2](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/d8069a290c553ad645b297049a0a778ec1ad3837) / nhánh `dev/huy` | Hiểu cách thiết kế PII redaction theo hướng defense-in-depth, thứ tự processor trong structured logging và cách cân bằng giữa khả năng phát hiện PII với việc tránh che nhầm metadata phục vụ observability. |
-| Nghĩa (Thành viên C) | **Metrics & Dashboard Spec**: Bổ sung `error_rate_pct` zero-safe trong `app/metrics.py`, viết 6 unit tests trong `tests/test_metrics.py`, chuẩn hóa & mở rộng `docs/dashboard-spec.md` theo chuẩn kiến trúc Dashboard 2-Tier OpenTelemetry GenAI. | [Commit 1039dd7](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/1039dd7) / PR `dev/nghia` | Nắm vững 6 GenAI Golden Signals cốt lõi (Tier-1) và 6 chỉ số nâng cao Enterprise Tier-2 (TTFT, RAG Latency, Cost per User, Generation Speed, Faithfulness, Token Ratio). |
+| Raijuz (Thành viên A) | Correlation ID middleware, enrichment, response headers, exception handling và load-test error path. | [Commit 103fc50](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/103fc50) | Contextvars phải được clear/bind theo request; error response vẫn cần correlation ID. |
+| Huy (Thành viên B) | Recursive PII scrubbing, regex email/phone/CCCD/card/passport/address và security tests. | [Commit d8069a2](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/d8069a2) | Scrubber phải chạy trước serializer và cần negative test để không phá metadata kỹ thuật. |
+| Nguyễn Trần Nghĩa (Thành viên C) | `error_rate_pct` zero-safe, unit tests và dashboard spec 6 Golden Signals. | [Commit 77d7033](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/77d7033) | Percentile/error rate cần zero-safe; dashboard AI phải theo dõi thêm cost và quality. |
+| Hải (Thành viên D) | SLO và nền tảng runbook symptom-based; phần còn thiếu được hoàn thiện trong tích hợp CP2. | [Commit 167edaf](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/167edaf) | Alert nên dựa trên triệu chứng/SLO và có ba bước điều tra đầu tiên rõ ràng. |
+| Nguyễn Quang Hà (Thành viên E) | QA tích hợp, sub-span RAG/LLM, correlation trace metadata, dashboard runtime, Prompt Management, điều tra CP3 và tổng hợp evidence/report. | Commits `05b5ab8`, `868771b`, `f0302ce`, `c77f491`; xem [`BAO_CAO_THANH_VIEN_E.md`](BAO_CAO_THANH_VIEN_E.md) | Metrics phát hiện triệu chứng; waterfall khoanh vùng retrieval; correlation ID nối trace với log. API key thật chỉ lưu cục bộ trong `.env`, không commit. |
 

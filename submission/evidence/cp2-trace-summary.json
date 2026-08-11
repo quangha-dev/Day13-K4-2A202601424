@@ -1,0 +1,27 @@
+{
+  "captured_at": "2026-08-11T09:55:00Z",
+  "project": "My Project",
+  "prompt_name": "day13-chat",
+  "baseline_trace_count": 10,
+  "baseline_trace_ids": [
+    "686ab6ff4d29e9c63166872f3f02de45",
+    "99e54dafaebc5e98767538b389afe31c",
+    "2e747b682a638a6cc41467aed213d074",
+    "f8a5ed9d1e54cde061f90ff60c9b95ab",
+    "b669785b3755bd86a0693ae664b4e4b2",
+    "804853bdf192191434d5760636b6056e",
+    "162e314ccfcc89def7ecccff328c04f7",
+    "d1e4b3295a38a9202a7b4c5bbcffc900",
+    "ef4e99c572950f39af092251c308e638",
+    "132d610eefc2cb7e6c94e64b452c1bce"
+  ],
+  "verified_fields": [
+    "session_id",
+    "correlation_id",
+    "prompt_name",
+    "prompt_label",
+    "prompt_version",
+    "run/retrieve/generate observations"
+  ],
+  "screenshot": "cp2-trace-list-10.jpg"
+}
