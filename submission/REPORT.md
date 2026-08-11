@@ -27,6 +27,44 @@
 - Evidence trace waterfall: [`evidence/cp2-trace-waterfall.jpg`](evidence/cp2-trace-waterfall.jpg) hiển thị đầy đủ `run/retrieve/generate`.
 - Giải thích một span đáng chú ý: waterfall incident đo `retrieve=2501 ms`, `generate=151 ms`; retrieval là span gây chậm. Kết quả khớp phép đo runtime độc lập `retrieve=2512.5 ms`, `generate=150.7 ms`.
 
+### 3.1. Kết quả phần việc Security Engineer (Huy — Thành viên B)
+
+Phạm vi thực hiện gồm `app/pii.py`, processor `scrub_event` trong `app/logging_config.py` và kiểm thử tại `tests/test_pii.py`.
+
+- Bổ sung nhận diện passport và địa chỉ Việt Nam bên cạnh email, số điện thoại Việt Nam, CCCD và thẻ tín dụng.
+- Nâng `scrub_event` từ xử lý riêng `payload`/`event` thành scrub toàn bộ giá trị chuỗi trong log, bao gồm cấu trúc lồng nhau dạng `dict`, `list` và `tuple`.
+- Đăng ký `scrub_event` trong pipeline trước `JsonlFileProcessor` và `JSONRenderer`, bảo đảm PII được che trước khi log được ghi xuống file hoặc render ra output.
+- Bổ sung kiểm thử positive cho các định dạng PII và negative cases để giữ nguyên correlation ID, timestamp, tên model, token, cost và session ID hợp lệ.
+
+| Loại dữ liệu | Ví dụ đầu vào kiểm thử | Marker đầu ra mong đợi |
+|---|---|---|
+| Email | `student@vinuni.edu.vn` | `[REDACTED_EMAIL]` |
+| Điện thoại Việt Nam | `0901234567`, `+84 90 123 4567` | `[REDACTED_PHONE_VN]` |
+| CCCD | `001234567890` | `[REDACTED_CCCD]` |
+| Thẻ tín dụng | `4111-1111-1111-1111` | `[REDACTED_CREDIT_CARD]` |
+| Passport | `B1234567` | `[REDACTED_PASSPORT]` |
+| Địa chỉ Việt Nam | `123 Đường Nguyễn Trãi`, `Phường Bến Nghé` | `[REDACTED_ADDRESS_VI]` |
+
+Kết quả chạy `python3 scripts/validate_logs.py`:
+
+```text
+Total log records analyzed: 23
+Records with missing required fields: 0
+Records with missing enrichment (context): 0
+Unique correlation IDs found: 11
+Potential PII leaks detected: 0
+Estimated Score: 100/100
+```
+
+Lệnh kiểm tra phần việc:
+
+```bash
+python -m pytest tests/test_pii.py tests/test_validate_logs.py -q
+python scripts/validate_logs.py
+```
+
+> Evidence terminal/ảnh minh họa: `[TỰ ĐIỀN ĐƯỜNG DẪN SAU KHI CHỤP]`.
+
 ## 4. Prompt versioning
 
 - Prompt name: `day13-chat` trên project Langfuse thật.
@@ -72,5 +110,4 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 | Nguyễn Trần Nghĩa (Thành viên C) | `error_rate_pct` zero-safe, unit tests và dashboard spec 6 Golden Signals. | [Commit 77d7033](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/77d7033) | Percentile/error rate cần zero-safe; dashboard AI phải theo dõi thêm cost và quality. |
 | Hải (Thành viên D) | SLO và nền tảng runbook symptom-based; phần còn thiếu được hoàn thiện trong tích hợp CP2. | [Commit 167edaf](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/167edaf) | Alert nên dựa trên triệu chứng/SLO và có ba bước điều tra đầu tiên rõ ràng. |
 | Nguyễn Quang Hà (Thành viên E) | QA tích hợp, sub-span RAG/LLM, correlation trace metadata, dashboard runtime, Prompt Management, điều tra CP3 và tổng hợp evidence/report. | Commits `05b5ab8`, `868771b`, `f0302ce`, `c77f491`; xem [`BAO_CAO_THANH_VIEN_E.md`](BAO_CAO_THANH_VIEN_E.md) | Metrics phát hiện triệu chứng; waterfall khoanh vùng retrieval; correlation ID nối trace với log. API key thật chỉ lưu cục bộ trong `.env`, không commit. |
-
 
