@@ -39,22 +39,22 @@ Phạm vi thực hiện gồm `app/pii.py`, processor `scrub_event` trong `app/l
 - Đăng ký `scrub_event` trong pipeline trước `JsonlFileProcessor` và `JSONRenderer`, bảo đảm PII được che trước khi log được ghi xuống file hoặc render ra output.
 - Bổ sung kiểm thử positive cho các định dạng PII và negative cases để giữ nguyên correlation ID, timestamp, tên model, token, cost và session ID hợp lệ.
 
-| Loại dữ liệu | Ví dụ đầu vào kiểm thử | Marker đầu ra mong đợi |
-|---|---|---|
-| Email | `student@vinuni.edu.vn` | `[REDACTED_EMAIL]` |
-| Điện thoại Việt Nam | `0901234567`, `+84 90 123 4567` | `[REDACTED_PHONE_VN]` |
-| CCCD | `001234567890` | `[REDACTED_CCCD]` |
-| Thẻ tín dụng | `4111-1111-1111-1111` | `[REDACTED_CREDIT_CARD]` |
-| Passport | `B1234567` | `[REDACTED_PASSPORT]` |
-| Địa chỉ Việt Nam | `123 Đường Nguyễn Trãi`, `Phường Bến Nghé` | `[REDACTED_ADDRESS_VI]` |
+| Loại dữ liệu được kiểm thử | Marker đầu ra mong đợi |
+|---|---|
+| Email | `[REDACTED_EMAIL]` |
+| Điện thoại Việt Nam | `[REDACTED_PHONE_VN]` |
+| CCCD | `[REDACTED_CCCD]` |
+| Thẻ tín dụng | `[REDACTED_CREDIT_CARD]` |
+| Passport | `[REDACTED_PASSPORT]` |
+| Địa chỉ Việt Nam | `[REDACTED_ADDRESS_VI]` |
 
-Kết quả chạy `python3 scripts/validate_logs.py`:
+Kết quả nghiệm thu cuối bằng `python scripts/validate_logs.py`:
 
 ```text
-Total log records analyzed: 23
+Total log records analyzed: 111
 Records with missing required fields: 0
 Records with missing enrichment (context): 0
-Unique correlation IDs found: 11
+Unique correlation IDs found: 54
 Potential PII leaks detected: 0
 Estimated Score: 100/100
 ```
@@ -66,7 +66,7 @@ python -m pytest tests/test_pii.py tests/test_validate_logs.py -q
 python scripts/validate_logs.py
 ```
 
-> Evidence terminal/ảnh minh họa: `[TỰ ĐIỀN ĐƯỜNG DẪN SAU KHI CHỤP]`.
+Evidence kiểm chứng: [`evidence/cp1-pii-redacted.json`](evidence/cp1-pii-redacted.json) và [`evidence/cp1-validate-logs.txt`](evidence/cp1-validate-logs.txt).
 
 ## 4. Prompt versioning
 
@@ -114,3 +114,6 @@ Với mỗi thành viên, ghi rõ nhiệm vụ và link commit/PR tương ứng.
 | Hải (Thành viên D) | SLO và nền tảng runbook symptom-based; phần còn thiếu được hoàn thiện trong tích hợp CP2. | [Commit 167edaf](https://github.com/quangha-dev/Day13-K4-2A202601424/commit/167edaf) | Alert nên dựa trên triệu chứng/SLO và có ba bước điều tra đầu tiên rõ ràng. |
 | Nguyễn Quang Hà (Thành viên E) | QA tích hợp, sub-span RAG/LLM, correlation trace metadata, dashboard runtime, Prompt Management, điều tra CP3 và tổng hợp evidence/report. | Commits `05b5ab8`, `868771b`, `f0302ce`, `c77f491`, `b9ef61b`, `9c335d9`; xem [`BAO_CAO_THANH_VIEN_E.md`](BAO_CAO_THANH_VIEN_E.md) | Metrics phát hiện triệu chứng; waterfall khoanh vùng retrieval; correlation ID nối trace với log. API key thật chỉ lưu cục bộ trong `.env`, không commit. |
 
+## 8. Tự chấm và chuẩn bị demo
+
+- Bảng đối chiếu từng mục của `RUBRIC.md`, kết quả nghiệm thu cuối và kịch bản bảo vệ phần điểm demo/hỏi đáp: [`GRADING_SELF_ASSESSMENT.md`](GRADING_SELF_ASSESSMENT.md).
