@@ -87,3 +87,9 @@ def test_scrub_event_recursively_scrubs_all_string_values() -> None:
 )
 def test_scrubber_preserves_non_pii_technical_values(technical_value: str) -> None:
     assert scrub_text(technical_value) == technical_value
+
+
+def test_scrubber_preserves_lowercase_correlation_id() -> None:
+    correlation_id = "req-c7040763"
+
+    assert scrub_text(correlation_id) == correlation_id

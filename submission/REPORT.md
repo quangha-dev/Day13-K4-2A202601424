@@ -2,24 +2,29 @@
 
 ## 1. Thông tin nhóm
 
-- Tên nhóm:
-- Repository URL:
-- Commit SHA cuối:
+- Tên nhóm: K4-DAY13-2A202601424
+- Repository URL: https://github.com/quangha-dev/Day13-K4-2A202601424
+- Commit SHA cuối: Cập nhật sau commit hoàn tất cuối cùng
 - Thành viên và vai trò:
+  - Thành viên A (Raijuz): API & Middleware.
+  - Thành viên B (Huy): Security Engineer.
+  - Thành viên C (Nguyễn Trần Nghĩa): Metrics & Dashboard.
+  - Thành viên D (Hải): SRE & Alerts Engineer.
+  - Thành viên E (Nguyễn Quang Hà): QA & Chief Investigator.
 
 ## 2. Kết quả kỹ thuật
 
-- Điểm `validate_logs.py`:
-- Tổng số traces:
-- Số PII leak còn lại:
-- Link/đường dẫn dashboard:
+- Điểm `validate_logs.py`: 100/100 — [`evidence/cp1-validate-logs.txt`](evidence/cp1-validate-logs.txt)
+- Tổng số traces: Chưa thu thập — Langfuse chưa được cấu hình trên máy tích hợp.
+- Số PII leak còn lại: 0.
+- Link/đường dẫn dashboard: [`../config/dashboard.yaml`](../config/dashboard.yaml), evidence runtime bổ sung tại CP2.
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID:
-- Evidence PII redaction:
-- Evidence trace waterfall:
-- Giải thích một span đáng chú ý:
+- Evidence correlation ID: [`evidence/cp1-correlation-log.json`](evidence/cp1-correlation-log.json) — `request_received` và `response_sent` cùng ID `req-df839ca4`.
+- Evidence PII redaction: [`evidence/cp1-pii-redacted.json`](evidence/cp1-pii-redacted.json) — email, số điện thoại và credit card đều được thay bằng marker.
+- Evidence trace waterfall: Chưa thu thập — bổ sung sau khi bật Langfuse.
+- Giải thích một span đáng chú ý: Sẽ hoàn thiện bằng kết quả điều tra CP3 thật.
 
 ## 4. Prompt versioning
 
