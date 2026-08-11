@@ -1,8 +1,5 @@
-# Báo cáo thực hiện — Thành viên E (Nguyễn Quang Hà)
+# Báo cáo thực hiện 
 
-## Vai trò
-
-QA & Chief Investigator: kiểm thử tích hợp, tracing cho RAG/LLM, điều tra challenge theo Metrics → Traces → Logs, tổng hợp evidence và báo cáo nhóm.
 
 ## Nhật ký thực hiện
 
